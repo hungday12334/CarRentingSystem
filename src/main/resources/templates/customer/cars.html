@@ -1,10 +1,15 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <title>Title</title>
 </head>
 <body>
 Carrs
+
+<p th:text="${session.account.role}">oke</p>
+<p th:text="${session.account.email}">oke</p>
+<p th:text="${session.account.username}">oke</p>
+<a th:href="@{/customer}">cus</a>
 </body>
 </html>

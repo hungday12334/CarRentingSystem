@@ -46,7 +46,8 @@ public class AuthFilter implements Filter {
                     filterChain.doFilter(servletRequest, servletResponse);
                     return;
                 } else {
-                    response.sendRedirect( "/auth/logout?unauthorized="+"oke");
+                    session.invalidate();
+                    response.sendRedirect( "/auth/login?error=true");
                     return;
                 }
             }

@@ -16,25 +16,25 @@ public class CustomerController {
     @GetMapping
     public String index(Model model) {
         model.addAttribute("listCar", carService.findTop5ByOrderByRentedDesc());
-        return "customer/index";
+        return "/customer/index";
     }
 
     @GetMapping("/cars")
     public String cars() {
-        return "customer/cars";
+        return "/customer/cars";
     }
 
     @GetMapping("rental-history")
     public String rentalHistory() {
-        return "customer/rental-history";
+        return "/customer/rental-history";
     }
 
     @GetMapping("profile")
     public String profile() {
-        return "customer/profile";
+        return "/customer/profile";
     }
     @GetMapping("deposit")
     public String deposit() {
-        return "customer/deposit";
+        return "/customer/deposit";
     }
 }
