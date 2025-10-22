@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đăng ký | Car Rental System</title>
+    <style>
+        body {
+            background: #f4f7fa;
+            font-family: 'Segoe UI', sans-serif;
+        }
+        .container {
+            width: 450px;
+            margin: 80px auto;
+            padding: 40px;
+            background: white;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            border-radius: 12px;
+        }
+        h2 {
+            text-align: center;
+            margin-bottom: 25px;
+            color: #333;
+        }
+        input {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            border-radius: 6px;
+            border: 1px solid #ccc;
+        }
+        button {
+            width: 100%;
+            background-color: #4a6cf7;
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 6px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #3c5de7;
+        }
+        .login-link {
+            margin-top: 15px;
+            text-align: center;
+        }
+        .error, .success {
+            text-align: center;
+            margin-bottom: 10px;
+        }
+        .error {
+            color: #d93025; /* đỏ đậm */
+            border: 2px solid #d93025;
+            background-color: #fff; /* nền trắng */
+            padding: 10px 14px;
+            border-radius: 6px;
+            font-weight: 600;
+            margin-top: 10px;
+        }
+
+        .success {
+            color: #137333; /* xanh đậm */
+            border: 2px solid #137333;
+            background-color: #fff; /* nền trắng */
+            padding: 10px 14px;
+            border-radius: 6px;
+            font-weight: 600;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h2>Đăng ký tài khoản</h2>
+
+    <div th:if="${error}" class="error" th:text="${error}"></div>
+    <div th:if="${success}" class="success" th:text="${success}"></div>
+
+    <form th:action="@{/auth/register}"  method="post">
+        <label>Họ và tên</label>
+        <input name="name" type="text"  placeholder="Nguyễn Văn A" required th:value="${name}">
+
+        <label>Email</label>
+        <input name="email" type="email"  placeholder="abc@gmail.com" required th:value="${email}">
+
+        <label>Tên đăng nhập</label>
+        <input name="username" type="text"  placeholder="Tên đăng nhập" required th:value="${username}">
+
+        <label>Mật khẩu</label>
+        <input name="password" type="password"  placeholder="Mật khẩu" required th:value="${password}">
+
+        <label>Xác nhận mật khẩu</label>
+        <input name="password2" type="password" placeholder="Nhập lại mật khẩu" required th:value="${password2}">
+
+        <button type="submit">Đăng ký</button>
+    </form>
+
+    <div class="login-link">
+        <p>Đã có tài khoản? <a th:href="@{/auth/login}">Đăng nhập</a></p>
+    </div>
+</div>
+</body>
+</html>
