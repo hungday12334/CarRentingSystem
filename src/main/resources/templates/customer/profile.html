@@ -1,10 +1,399 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <title>CRS - Customer Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #f4f4f9;
+            color: #333;
+        }
+
+        /* Navigation Bar */
+        .navbar {
+            background-color: #1a2b49;
+            padding: 15px 30px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .navbar .logo {
+            font-size: 24px;
+            font-weight: bold;
+            color: #ffffff;
+            text-decoration: none;
+        }
+
+        .navbar .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .navbar .nav-links a {
+            color: #ffffff;
+            text-decoration: none;
+            font-size: 16px;
+            transition: color 0.3s;
+        }
+
+        .navbar .nav-links a:hover {
+            color: #00aaff;
+        }
+
+        .navbar .nav-links .profile-icon {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background-color: #ffffff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #1a2b49;
+            font-weight: bold;
+            text-decoration: none;
+        }
+
+        .top-cars h2 {
+            font-size: 28px;
+            margin-bottom: 20px;
+            color: #1a2b49;
+            text-align: center;
+        }
+
+        .car-card img {
+            width: 100%;
+            height: 150px;
+            object-fit: cover;
+        }
+
+        .car-card .car-info {
+            padding: 15px;
+        }
+
+        .car-card h3 {
+            font-size: 18px;
+            margin-bottom: 10px;
+            color: #1a2b49;
+        }
+
+        .car-card p {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 10px;
+        }
+
+        .car-card .price {
+            font-size: 16px;
+            font-weight: bold;
+            color: #00aaff;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .navbar {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .navbar .nav-links {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+
+
+            .banner a {
+                font-size: 16px;
+                padding: 10px 20px;
+            }
+        }
+        /* Profile Section Styles */
+        .profile-section {
+            max-width: 600px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #f9f9f9;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        .profile-section h2 {
+            font-size: 1.8rem;
+            color: #333;
+            margin-bottom: 15px;
+        }
+
+        .profile-section .error {
+            background-color: #f8d7da;
+            color: #721c24;
+            padding: 10px;
+            border-radius: 4px;
+            margin-bottom: 15px;
+            font-size: 0.9rem;
+        }
+
+        .profile-section .success {
+            background-color: #d4edda;
+            color: #155724;
+            padding: 10px;
+            border-radius: 4px;
+            margin-bottom: 15px;
+            font-size: 0.9rem;
+        }
+
+        .profile-form {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            text-align: left;
+        }
+
+        .form-group label {
+            font-size: 0.9rem;
+            color: #555;
+            margin-bottom: 5px;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 1rem;
+            background-color: #fff;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input[readonly] {
+            background-color: #e9ecef;
+            cursor: not-allowed;
+        }
+
+        .form-group input:focus:not([readonly]) {
+            outline: none;
+            border-color: #007bff;
+        }
+
+        .password-group {
+            position: relative;
+        }
+
+        .password-wrapper {
+            display: flex;
+            align-items: center;
+        }
+
+        .password-wrapper input {
+            flex: 1;
+        }
+
+        .toggle-password {
+            background: none;
+            border: none;
+            padding: 10px;
+            cursor: pointer;
+            color: #555;
+            position: absolute;
+            right: 5px;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
+        .toggle-password:hover {
+            color: #007bff;
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+
+        .update-button {
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .update-button:hover {
+            background-color: #0056b3;
+        }
+
+        .save-button {
+            padding: 10px 20px;
+            background-color: #28a745;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .save-button:hover {
+            background-color: #218838;
+        }
+
+        .cancel-button {
+            padding: 10px 20px;
+            background-color: #dc3545;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .cancel-button:hover {
+            background-color: #c82333;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .profile-section {
+                padding: 15px;
+            }
+            .form-group {
+                min-width: 100%;
+            }
+            .form-actions {
+                flex-direction: column;
+                gap: 10px;
+            }
+        }
+    </style>
+    <script>
+        function enableEdit() {
+            // Bật chế độ chỉnh sửa cho tất cả input
+            document.querySelectorAll('.profile-form input:not([name="customerId"])')
+                .forEach(input => input.removeAttribute('readonly'));
+            document.querySelector('.update-button').style.display = 'none';
+            document.querySelector('.save-button').style.display = 'inline-block';
+            document.querySelector('.cancel-button').style.display = 'inline-block';
+            // Đảm bảo password input ở trạng thái ẩn ban đầu
+            document.querySelector('#password').type = 'password';
+        }
+
+        function disableEdit() {
+            // Hủy chỉnh sửa, quay lại chế độ xem
+            document.querySelectorAll('.profile-form input:not([name="customerId"])')
+                .forEach(input => {
+                    input.setAttribute('readonly', 'readonly');
+                    if (input.id === 'password') {
+                        input.type = 'password';
+                    }
+                });
+            document.querySelector('.update-button').style.display = 'inline-block';
+            document.querySelector('.save-button').style.display = 'none';
+            document.querySelector('.cancel-button').style.display = 'none';
+        }
+
+        function togglePassword() {
+            const passwordInput = document.querySelector('#password');
+            const toggleIcon = document.querySelector('.toggle-password i');
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                toggleIcon.classList.remove('fa-eye');
+                toggleIcon.classList.add('fa-eye-slash');
+            } else {
+                passwordInput.type = 'password';
+                toggleIcon.classList.remove('fa-eye-slash');
+                toggleIcon.classList.add('fa-eye');
+            }
+        }
+    </script>
 </head>
 <body>
+<!-- Navigation Bar -->
+<nav class="navbar">
+    <a th:href="@{/customer}" class="logo">CRS</a>
+    <div class="nav-links">
+        <a th:href="@{/customer}">Trang chủ</a>
+        <a th:href="@{/customer/cars}">Tất cả ô tô</a>
+        <a th:href="@{/customer/rental-history}">Lịch sử thuê xe</a>
+        <a th:href="@{/customer/deposit}">Nạp tiền</a>
+        <a th:href="@{/customer/profile}" class="profile-icon">P</a>
+        <a th:href="@{/auth/logout}">Đăng xuất</a>
+    </div>
+</nav>
 
+<!-- Profile Section -->
+<section class="profile-section">
+    <h2>Thông tin cá nhân</h2>
+    <div th:if="${error}" class="error" th:text="${error}"></div>
+    <div th:if="${success}" class="success" th:text="${success}"></div>
+
+    <form th:action="@{/customer/profile}" method="post" class="profile-form" id="profileForm">
+        <input type="hidden" name="customerId" th:value="${customer.customerId}" />
+        <div class="form-group">
+            <label for="customerName">Họ và tên</label>
+            <input type="text" id="customerName" name="customerName" th:value="${customer.customerName}" readonly />
+        </div>
+        <div class="form-group">
+            <label for="mobile">Số điện thoại</label>
+            <input type="number" id="mobile" name="mobile" th:value="${customer.mobile}" readonly />
+        </div>
+        <div class="form-group">
+            <label for="birthday">Ngày sinh</label>
+            <input type="date" id="birthday" name="birthday" th:value="${#temporals.format(customer.birthday, 'yyyy-MM-dd')}" readonly />
+        </div>
+        <div class="form-group">
+            <label for="identityCard">CMND/CCCD</label>
+            <input type="number" id="identityCard" name="identityCard" th:value="${customer.identityCard}" readonly />
+        </div>
+        <div class="form-group">
+            <label for="licenceNumber">Số GPLX</label>
+            <input type="number" id="licenceNumber" name="licenceNumber" th:value="${customer.licenceNumber}" readonly />
+        </div>
+        <div class="form-group">
+            <label for="licenceDate">Ngày cấp GPLX</label>
+            <input type="date" id="licenceDate" name="licenceDate" th:value="${#temporals.format(customer.licenceDate, 'yyyy-MM-dd')}" readonly />
+        </div>
+        <div class="form-group">
+            <label for="email">Email</label>
+            <input type="email" id="email" name="email" th:value="${customer.email}" readonly />
+        </div>
+        <div class="form-group password-group">
+            <label for="password">Mật khẩu</label>
+            <div class="password-wrapper">
+                <input type="password" id="password" name="password" th:value="${customer.password}" readonly />
+                <button type="button" class="toggle-password" onclick="togglePassword()">
+                    <i class="fas fa-eye"></i>
+                </button>
+            </div>
+        </div>
+        <div class="form-actions">
+            <button type="button" class="update-button" onclick="enableEdit()">Cập nhật</button>
+            <button type="submit" class="save-button" style="display: none;">Lưu</button>
+            <button type="button" class="cancel-button" style="display: none;" onclick="disableEdit()">Hủy</button>
+        </div>
+    </form>
+</section>
 </body>
 </html>

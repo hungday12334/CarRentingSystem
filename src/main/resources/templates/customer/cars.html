@@ -2,14 +2,327 @@
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CRS - Cars</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #f4f4f9;
+            color: #333;
+        }
+
+        /* Navigation Bar */
+        .navbar {
+            background-color: #1a2b49;
+            padding: 15px 30px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .navbar .logo {
+            font-size: 24px;
+            font-weight: bold;
+            color: #ffffff;
+            text-decoration: none;
+        }
+
+        .navbar .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .navbar .nav-links a {
+            color: #ffffff;
+            text-decoration: none;
+            font-size: 16px;
+            transition: color 0.3s;
+        }
+
+        .navbar .nav-links a:hover {
+            color: #00aaff;
+        }
+
+        .navbar .nav-links .profile-icon {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background-color: #ffffff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #1a2b49;
+            font-weight: bold;
+            text-decoration: none;
+        }
+
+        .banner a {
+            text-decoration: none;
+            background-color: #00aaff;
+            color: #ffffff;
+            padding: 15px 30px;
+            font-size: 18px;
+            font-weight: bold;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+
+        .banner a:hover {
+            background-color: #0077cc;
+        }
+
+        /* Top Cars Section */
+        .top-cars {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            background-color: #f9f9f9;
+            border-radius: 8px;
+        }
+
+        .top-cars h2 {
+            font-size: 28px;
+            margin-bottom: 20px;
+            color: #1a2b49;
+            text-align: center;
+        }
+
+        .car-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 20px;
+        }
+
+        .car-card {
+            background-color: #ffffff;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            transition: transform 0.3s;
+        }
+
+        .car-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .car-card img {
+            width: 100%;
+            height: 150px;
+            object-fit: cover;
+        }
+
+        .car-card .car-info {
+            padding: 15px;
+        }
+
+        .car-card h3 {
+            font-size: 18px;
+            margin-bottom: 10px;
+            color: #1a2b49;
+        }
+
+        .car-card p {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 10px;
+        }
+
+        .car-card .price {
+            font-size: 16px;
+            font-weight: bold;
+            color: #00aaff;
+        }
+        /* Filter Section Styles */
+        .filter-section {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #f9f9f9;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .filter-section h2 {
+            font-size: 1.8rem;
+            color: #333;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .filter-form {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            align-items: flex-end;
+        }
+
+        .filter-group {
+            flex: 1;
+            min-width: 180px; /* Giảm nhẹ để chứa thêm 2 input */
+        }
+
+        .filter-group label {
+            display: block;
+            font-size: 0.9rem;
+            color: #555;
+            margin-bottom: 5px;
+        }
+
+        .filter-group input,
+        .filter-group select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 1rem;
+            background-color: #fff;
+            transition: border-color 0.3s;
+        }
+
+        .filter-group input:focus,
+        .filter-group select:focus {
+            outline: none;
+            border-color: #007bff;
+        }
+
+        .filter-button {
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .filter-button:hover {
+            background-color: #0056b3;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .filter-form {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .filter-group {
+                min-width: 100%;
+            }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .navbar {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .navbar .nav-links {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+
+
+            .banner a {
+                font-size: 16px;
+                padding: 10px 20px;
+            }
+            .filter-form {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .filter-group {
+                min-width: 100%;
+            }
+        }
+    </style>
 </head>
 <body>
-Carrs
+<!-- Navigation Bar -->
+<nav class="navbar">
+    <a th:href="@{/customer}" class="logo">CRS</a>
+    <div class="nav-links">
+        <a th:href="@{/customer}">Trang chủ</a>
+        <a th:href="@{/customer/cars}">Tất cả ô tô</a>
+        <a th:href="@{/customer/rental-history}">Lịch sử thuê xe</a>
+        <a th:href="@{/customer/deposit}">Nạp tiền</a>
+        <a th:href="@{/customer/profile}" class="profile-icon">P</a>
+        <a th:href="@{/auth/logout}">Đăng xuất</a>
+    </div>
+</nav>
 
-<p th:text="${session.account.role}">oke</p>
-<p th:text="${session.account.email}">oke</p>
-<p th:text="${session.account.username}">oke</p>
-<a th:href="@{/customer}">cus</a>
+<!-- Filter Section -->
+<section class="filter-section">
+    <h2>Tìm kiếm xe</h2>
+    <form th:action="@{/customer/cars}" method="get" class="filter-form">
+        <div class="filter-group">
+            <label for="carName">Tên xe</label>
+            <input type="text" id="carName" name="carName" placeholder="Nhập tên xe..." th:value="${carName}"/>
+        </div>
+        <div class="filter-group">
+            <label for="color">Màu sắc</label>
+            <select id="color" name="color">
+                <option value="">Tất cả màu</option>
+                <option th:each="color : ${listColor}" th:value="${color}" th:text="${color}"> </option>
+            </select>
+        </div>
+        <div class="filter-group">
+            <label for="status">Trạng thái</label>
+            <select id="status" name="status">
+                <option value="">Tất cả trạng thái</option>
+                <option value="Available">Có sẵn</option>
+                <option value="Rented">Đang thuê</option>
+                <option value="Maintenance">Bảo dưỡng</option>
+            </select>
+        </div>
+        <div class="filter-group">
+            <label for="producerId">Nhà sản xuất</label>
+            <select id="producerId" name="producerId">
+                <option value="">Tất cả nhà sản xuất</option>
+                <option th:each="carProducer : ${listProducer}" th:value="${carProducer.producerId}" th:text="${carProducer.producerName}"> </option>
+            </select>
+        </div>
+        <div class="filter-group">
+            <label for="year">Năm xuất bản</label>
+            <input type="number" id="year" name="year" placeholder="VD: 2020" min="2000" max="2025" th:value="${year}"/>
+        </div>
+        <div class="filter-group">
+            <label for="priceFrom">Giá tối thiểu (VNĐ)</label>
+            <input type="number" id="priceFrom" name="priceFrom" placeholder="VD: 500000" min="0" step="100000" th:value="${priceFrom}"/>
+        </div>
+        <div class="filter-group">
+            <label for="priceTo">Giá tối đa (VNĐ)</label>
+            <input type="number" id="priceTo" name="priceTo" placeholder="VD: 2000000" min="0" step="100000" th:value="${priceTo}"/>
+        </div>
+        <button type="submit" class="filter-button">Tìm kiếm</button>
+    </form>
+</section>
+<!-- Full cars -->
+<section class="top-cars">
+    <h2>Tất Cả Xe</h2>
+    <h3>Có tất cả <span th:text="${listCar.size()}"></span> sản phẩm.</h3>
+    <div class="car-grid">
+        <div th:each="car : ${listCar}" class="car-card">
+            <img th:src="${car.imageUrl}" th:alt="${car.carName}" />
+            <div class="car-info">
+                <h3 th:text="${car.carName}">Tên xe</h3>
+                <p th:text="${car.address}">Địa chỉ</p>
+                <p class="price" th:text="'Giá thuê: ' + ${#numbers.formatInteger(car.rentPrice, 0, 'COMMA')} + ' VNĐ/ngày'">Giá</p>
+            </div>
+        </div>
+    </div>
+</section>
 </body>
 </html>

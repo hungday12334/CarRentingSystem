@@ -14,43 +14,43 @@ import java.net.URLEncoder;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 
-
-@WebFilter(urlPatterns = "/*")
-public class AuthFilter implements Filter {
-    @Override
-    public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
-        HttpServletRequest request = (HttpServletRequest) servletRequest;
-        HttpServletResponse response = (HttpServletResponse) servletResponse;
-        //Lay uri
-        String uri = request.getRequestURI();
-        //https/localhost:8080/carrentingsystem/customer/list
-        //request.getRequestURI() chỉ /carrentingsystem/customer/list
-        if (uri.startsWith("/auth") || uri.startsWith("/css") || uri.startsWith("/js") || uri.startsWith("/images")) {
-            filterChain.doFilter(servletRequest, servletResponse);
-            return;
-        }
-        //Lay session
-        HttpSession session = request.getSession(false);
-        if (session == null) {
-            response.sendRedirect( "/auth/login");
-            return;
-        } else {
-            Account account = (Account) session.getAttribute("account");
-            if (account == null) {
-                response.sendRedirect( "/auth/logout");
-                return;
-            } else {
-                boolean isCustomerArea = uri.startsWith("/customer") && "customer".equals(account.getRole());
-                boolean isAdminArea = uri.startsWith("/admin") && "admin".equals(account.getRole());
-                if (isCustomerArea || isAdminArea) {
-                    filterChain.doFilter(servletRequest, servletResponse);
-                    return;
-                } else {
-                    session.invalidate();
-                    response.sendRedirect( "/auth/login?error=true");
-                    return;
-                }
-            }
-        }
-    }
-}
+//
+//@WebFilter(urlPatterns = "/*")
+//public class AuthFilter implements Filter {
+//    @Override
+//    public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
+//        HttpServletRequest request = (HttpServletRequest) servletRequest;
+//        HttpServletResponse response = (HttpServletResponse) servletResponse;
+//        //Lay uri
+//        String uri = request.getRequestURI();
+//        //https/localhost:8080/carrentingsystem/customer/list
+//        //request.getRequestURI() chỉ /carrentingsystem/customer/list
+//        if (uri.startsWith("/auth") || uri.startsWith("/css") || uri.startsWith("/js") || uri.startsWith("/images")) {
+//            filterChain.doFilter(servletRequest, servletResponse);
+//            return;
+//        }
+//        //Lay session
+//        HttpSession session = request.getSession(false);
+//        if (session == null) {
+//            response.sendRedirect( "/auth/login");
+//            return;
+//        } else {
+//            Account account = (Account) session.getAttribute("account");
+//            if (account == null) {
+//                response.sendRedirect( "/auth/logout");
+//                return;
+//            } else {
+//                boolean isCustomerArea = uri.startsWith("/customer") && "customer".equals(account.getRole());
+//                boolean isAdminArea = uri.startsWith("/admin") && "admin".equals(account.getRole());
+//                if (isCustomerArea || isAdminArea) {
+//                    filterChain.doFilter(servletRequest, servletResponse);
+//                    return;
+//                } else {
+//                    session.invalidate();
+//                    response.sendRedirect( "/auth/login");
+//                    return;
+//                }
+//            }
+//        }
+//    }
+//}

@@ -21,11 +21,7 @@ public class AuthenticationController {
     private AccountService accountService;
 
     @GetMapping("/login")
-    public String login(HttpServletRequest request, Model model) {
-        String error = request.getParameter("error");
-        if(error!=null){
-            model.addAttribute("error","Bạn không có quyền truy cập vào trang này.");
-        }
+    public String login() {
         return "login/login";
     }
 

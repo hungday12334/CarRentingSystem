@@ -1,10 +1,180 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CRS - Customer Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #f4f4f9;
+            color: #333;
+        }
+
+        /* Navigation Bar */
+        .navbar {
+            background-color: #1a2b49;
+            padding: 15px 30px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .navbar .logo {
+            font-size: 24px;
+            font-weight: bold;
+            color: #ffffff;
+            text-decoration: none;
+        }
+
+        .navbar .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .navbar .nav-links a {
+            color: #ffffff;
+            text-decoration: none;
+            font-size: 16px;
+            transition: color 0.3s;
+        }
+
+        .navbar .nav-links a:hover {
+            color: #00aaff;
+        }
+
+        .navbar .nav-links .profile-icon {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background-color: #ffffff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #1a2b49;
+            font-weight: bold;
+            text-decoration: none;
+        }
+
+        .banner a:hover {
+            background-color: #0077cc;
+        }
+
+        /* Top Cars Section */
+        .top-cars {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .top-cars h2 {
+            font-size: 28px;
+            margin-bottom: 20px;
+            color: #1a2b49;
+            text-align: center;
+        }
+
+
+        .car-card img {
+            width: 100%;
+            height: 150px;
+            object-fit: cover;
+        }
+
+        .car-card .car-info {
+            padding: 15px;
+        }
+
+        .car-card h3 {
+            font-size: 18px;
+            margin-bottom: 10px;
+            color: #1a2b49;
+        }
+
+        .car-card p {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 10px;
+        }
+
+        .car-card .price {
+            font-size: 16px;
+            font-weight: bold;
+            color: #00aaff;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .navbar {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .navbar .nav-links {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+            .error, .success {
+                text-align: center;
+                margin-bottom: 10px;
+            }
+            .error {
+                color: #d93025; /* đỏ đậm */
+                border: 2px solid #d93025;
+                background-color: #fff; /* nền trắng */
+                padding: 10px 14px;
+                border-radius: 6px;
+                font-weight: 600;
+                margin-top: 10px;
+            }
+
+            .success {
+                color: #137333; /* xanh đậm */
+                border: 2px solid #137333;
+                background-color: #fff; /* nền trắng */
+                padding: 10px 14px;
+                border-radius: 6px;
+                font-weight: 600;
+                margin-top: 10px;
+            }
+        }
+    </style>
 </head>
 <body>
-nap tien
+<!-- Navigation Bar -->
+<nav class="navbar">
+    <a th:href="@{/customer}" class="logo">CRS</a>
+    <div class="nav-links">
+        <a th:href="@{/customer}">Trang chủ</a>
+        <a th:href="@{/customer/cars}">Tất cả ô tô</a>
+        <a th:href="@{/customer/rental-history}">Lịch sử thuê xe</a>
+        <a th:href="@{/customer/deposit}">Nạp tiền</a>
+        <a th:href="@{/customer/profile}" class="profile-icon">P</a>
+        <a th:href="@{/auth/logout}">Đăng xuất</a>
+    </div>
+</nav>
+
+<!-- Top 5 Most Rented Cars -->
+<section class="top-cars">
+    <div th:if="${error}" class="error" th:text="${error}"></div>
+    <div th:if="${success}" class="success" th:text="${success}"></div>
+    <h3>Số tiền hiện tại: <span th:text="${balance}"></span></h3>
+    <h3>Nhập số tiền muốn nạp:</h3>
+    <form th:action="@{/customer/deposit}" method="post">
+        <input type="number" name="depositAmount" id="depositAmount" th:value="${depositAmount}" placeholder="VD: 10000000,000" min="0" max="100000000"/>
+        <button type="submit">Nạp tiền</button>
+    </form>
+</section>
 </body>
 </html>
