@@ -42,6 +42,9 @@ public class Customer implements Serializable {
     @Column(name = "password")
     private String password;
 
+    @Column(name = "balance")
+    private Double balance;
+
     @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JoinColumn(name = "account_id", referencedColumnName = "account_id")
     private Account account;
@@ -56,7 +59,7 @@ public class Customer implements Serializable {
     public Customer() {
     }
 
-    public Customer(String customerName, String mobile, LocalDate birthday, String identityCard, String licenceNumber, LocalDate licenceDate, String email, String password) {
+    public Customer(String customerName, String mobile, LocalDate birthday, String identityCard, String licenceNumber, LocalDate licenceDate, String email, String password, Double balance) {
         this.customerName = customerName;
         this.mobile = mobile;
         this.birthday = birthday;
@@ -65,12 +68,14 @@ public class Customer implements Serializable {
         this.licenceDate = licenceDate;
         this.email = email;
         this.password = password;
+        this.balance = balance;
     }
 
-    public Customer(String customerName, String email, String password) {
+    public Customer(String customerName, String email, String password, Double balance) {
         this.customerName = customerName;
         this.email = email;
         this.password = password;
+        this.balance = balance;
     }
 
     public Long getCustomerId() {
@@ -151,5 +156,29 @@ public class Customer implements Serializable {
 
     public void setAccount(Account account) {
         this.account = account;
+    }
+
+    public Double getBalance() {
+        return balance;
+    }
+
+    public void setBalance(Double balance) {
+        this.balance = balance;
+    }
+
+    public List<CarRental> getRentals() {
+        return rentals;
+    }
+
+    public void setRentals(List<CarRental> rentals) {
+        this.rentals = rentals;
+    }
+
+    public List<Review> getReviews() {
+        return reviews;
+    }
+
+    public void setReviews(List<Review> reviews) {
+        this.reviews = reviews;
     }
 }

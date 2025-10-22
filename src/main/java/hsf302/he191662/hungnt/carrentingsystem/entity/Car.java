@@ -17,6 +17,9 @@ public class Car implements Serializable {
     @Column(name = "car_name", nullable = false)
     private String carName;
 
+    @Column(name = "image_url")
+    private String imageUrl;
+
     @Column(name = "car_model_year", nullable = false)
     private Integer carModelYear;
 
@@ -25,6 +28,9 @@ public class Car implements Serializable {
 
     @Column(name = "capacity", nullable = false)
     private Integer capacity;
+
+    @Column(name = "rented", nullable = false)
+    private Integer rented;
 
     @Column(name = "description", nullable = false, columnDefinition = "TEXT")
     private String description;
@@ -42,6 +48,9 @@ public class Car implements Serializable {
     @Column(name = "status", nullable = false)
     private String status;
 
+    @Column(name = "address")
+    private String address;
+
     @OneToMany(mappedBy = "car", cascade = CascadeType.ALL)
     private List<CarRental> rentals;
 
@@ -51,16 +60,34 @@ public class Car implements Serializable {
     public Car() {
     }
 
-    public Car(String carName, Integer carModelYear, String color, Integer capacity, String description, LocalDate importDate, CarProducer producer, Double rentPrice, String status) {
-        this.carName = carName;
+    public Car(String imageUrl, Integer carModelYear, String color, Integer capacity, Integer rented, String description, LocalDate importDate, CarProducer producer, Double rentPrice, String status, String carName) {
+        this.imageUrl = imageUrl;
         this.carModelYear = carModelYear;
         this.color = color;
         this.capacity = capacity;
+        this.rented = rented;
         this.description = description;
         this.importDate = importDate;
         this.producer = producer;
         this.rentPrice = rentPrice;
         this.status = status;
+        this.carName = carName;
+    }
+
+    public String getImageUrl() {
+        return imageUrl;
+    }
+
+    public void setImageUrl(String imageUrl) {
+        this.imageUrl = imageUrl;
+    }
+
+    public Integer getRented() {
+        return rented;
+    }
+
+    public void setRented(Integer rented) {
+        this.rented = rented;
     }
 
     public Long getCarId() {
@@ -149,6 +176,14 @@ public class Car implements Serializable {
 
     public void setRentals(List<CarRental> rentals) {
         this.rentals = rentals;
+    }
+
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
     }
 
     public List<Review> getReviews() {

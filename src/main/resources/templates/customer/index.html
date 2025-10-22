@@ -1,10 +1,214 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CRS - Customer Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #f4f4f9;
+            color: #333;
+        }
+
+        /* Navigation Bar */
+        .navbar {
+            background-color: #1a2b49;
+            padding: 15px 30px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .navbar .logo {
+            font-size: 24px;
+            font-weight: bold;
+            color: #ffffff;
+            text-decoration: none;
+        }
+
+        .navbar .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .navbar .nav-links a {
+            color: #ffffff;
+            text-decoration: none;
+            font-size: 16px;
+            transition: color 0.3s;
+        }
+
+        .navbar .nav-links a:hover {
+            color: #00aaff;
+        }
+
+        .navbar .nav-links .profile-icon {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background-color: #ffffff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #1a2b49;
+            font-weight: bold;
+            text-decoration: none;
+        }
+
+        /* Banner */
+        .banner {
+            position: relative;
+            width: 100%;
+            height: 300px;
+            background: url('https://images.unsplash.com/photo-1492144534655-ae79c964c9d7') no-repeat center center/cover;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 40px;
+        }
+
+        .banner a {
+            text-decoration: none;
+            background-color: #00aaff;
+            color: #ffffff;
+            padding: 15px 30px;
+            font-size: 18px;
+            font-weight: bold;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+
+        .banner a:hover {
+            background-color: #0077cc;
+        }
+
+        /* Top Cars Section */
+        .top-cars {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .top-cars h2 {
+            font-size: 28px;
+            margin-bottom: 20px;
+            color: #1a2b49;
+            text-align: center;
+        }
+
+        .car-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 20px;
+        }
+
+        .car-card {
+            background-color: #ffffff;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            transition: transform 0.3s;
+        }
+
+        .car-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .car-card img {
+            width: 100%;
+            height: 150px;
+            object-fit: cover;
+        }
+
+        .car-card .car-info {
+            padding: 15px;
+        }
+
+        .car-card h3 {
+            font-size: 18px;
+            margin-bottom: 10px;
+            color: #1a2b49;
+        }
+
+        .car-card p {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 10px;
+        }
+
+        .car-card .price {
+            font-size: 16px;
+            font-weight: bold;
+            color: #00aaff;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .navbar {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .navbar .nav-links {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+
+            .banner {
+                height: 200px;
+            }
+
+            .banner a {
+                font-size: 16px;
+                padding: 10px 20px;
+            }
+        }
+    </style>
 </head>
 <body>
-customer
+<!-- Navigation Bar -->
+<nav class="navbar">
+    <a th:href="@{/customer}" class="logo">CRS</a>
+    <div class="nav-links">
+        <a th:href="@{/customer}">Trang chủ</a>
+        <a th:href="@{/customer/cars}">Tất cả ô tô</a>
+        <a th:href="@{/customer/rental-history}">Lịch sử thuê xe</a>
+        <a th:href="@{/customer/deposit}">Nạp tiền</a>
+        <a th:href="@{/customer/profile}" class="profile-icon">P</a>
+        <a th:href="@{/auth/logout}">Đăng xuất</a>
+    </div>
+</nav>
+
+<!-- Banner -->
+<div class="banner">
+    <a th:href="@{/customer/cars}">Khám phá ngay tất cả ô tô</a>
+</div>
+
+<!-- Top 5 Most Rented Cars -->
+<section class="top-cars">
+    <h2>Top 5 Xe Được Thuê Nhiều Nhất</h2>
+    <div class="car-grid">
+        <div th:each="car : ${listCar}" class="car-card">
+            <img th:src="${car.imageUrl}" th:alt="${car.carName}" />
+            <div class="car-info">
+                <h3 th:text="${car.carName}">Tên xe</h3>
+                <p th:text="${car.address}">Địa chỉ</p>
+                <p class="price" th:text="'Giá thuê: ' + ${#numbers.formatInteger(car.rentPrice, 0, 'COMMA')} + ' VNĐ/ngày'">Giá</p>
+            </div>
+        </div>
+    </div>
+</section>
 </body>
 </html>

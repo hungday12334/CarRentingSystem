@@ -126,7 +126,7 @@ public class AuthenticationController {
             }
         }
         Account account = new Account(username.trim(), password, email.trim(), "customer", true);
-        Customer customer = new Customer(name, account.getEmail(), account.getPassword());
+        Customer customer = new Customer(name, account.getEmail(), account.getPassword(),0.0);
         account.setCustomer(customer);
         customer.setAccount(account);
         accountService.save(account);

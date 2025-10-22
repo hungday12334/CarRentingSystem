@@ -44,8 +44,10 @@ public class AuthFilter implements Filter {
                 boolean isAdminArea = uri.startsWith("/admin") && "admin".equals(account.getRole());
                 if (isCustomerArea || isAdminArea) {
                     filterChain.doFilter(servletRequest, servletResponse);
+                    return;
                 } else {
                     response.sendRedirect( "/auth/logout?unauthorized="+"oke");
+                    return;
                 }
             }
         }
