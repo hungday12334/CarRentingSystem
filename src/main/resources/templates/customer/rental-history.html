@@ -1,11 +1,349 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Hệ thống thuê xe - Quản lý đơn thuê xe của bạn">
+    <title>CRS - Customer Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #f4f4f9;
+            color: #333;
+        }
+
+        /* Navigation Bar */
+        .navbar {
+            background-color: #1a2b49;
+            padding: 15px 30px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .navbar .logo {
+            font-size: 24px;
+            font-weight: bold;
+            color: #ffffff;
+            text-decoration: none;
+        }
+
+        .navbar .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .navbar .nav-links a {
+            color: #ffffff;
+            text-decoration: none;
+            font-size: 16px;
+            transition: color 0.3s;
+        }
+
+        .navbar .nav-links a:hover {
+            color: #00aaff;
+        }
+
+        .navbar .nav-links .profile-icon {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background-color: #ffffff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #1a2b49;
+            font-weight: bold;
+            text-decoration: none;
+        }
+
+        /* Filter Section */
+        .filter-section {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 20px;
+            border: 2px solid #8B4513;
+            border-radius: 10px;
+            background-color: #ffffff;
+        }
+
+        .filter-section h2 {
+            font-size: 24px;
+            color: #1a2b49;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        /* ✅ Sửa phần form để căn đều tất cả ô */
+        .filter-form {
+            display: flex;
+            flex-wrap: nowrap; /* ép tất cả trên 1 hàng */
+            justify-content: center;
+            gap: 15px;
+            align-items: flex-end;
+            overflow-x: auto; /* tránh tràn màn hình */
+        }
+
+        .form-field {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            min-width: 150px;  /* nhỏ hơn để đủ chỗ */
+            flex: 0 1 160px;
+        }
+
+
+        .form-field label {
+            font-size: 14px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .form-field select,
+        .form-field input {
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            font-size: 14px;
+            width: 100%;
+            transition: border-color 0.3s ease;
+        }
+
+        .filter-button {
+            padding: 12px 25px;
+            font-size: 16px;
+            background-color: #00aaff;
+            color: #ffffff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            height: fit-content;
+            align-self: flex-end;
+        }
+
+
+        .filter-button:hover {
+            background-color: #0077cc;
+        }
+
+        /* Rental Table */
+        .rental-table-section {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .rental-table-section h2 {
+            font-size: 28px;
+            margin-bottom: 20px;
+            color: #1a2b49;
+            text-align: center;
+        }
+
+        .rental-table {
+            width: 100%;
+            border-collapse: collapse;
+            background-color: #ffffff;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            border: 2px solid #8B4513;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .rental-table th, .rental-table td {
+            padding: 15px;
+            text-align: left;
+            font-size: 14px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .rental-table th {
+            background-color: #1a2b49;
+            color: #ffffff;
+            font-weight: bold;
+        }
+
+        .rental-table tr:hover {
+            background-color: #f9f9f9;
+        }
+
+        /* Status Styling */
+        .status {
+            display: inline-block;
+            padding: 8px 12px;
+            border-radius: 15px;
+            font-size: 13px;
+            font-weight: 500;
+            text-align: center;
+            color: #ffffff;
+            transition: transform 0.2s;
+        }
+
+        .status:hover {
+            transform: scale(1.05);
+        }
+
+        .status-pending {
+            background-color: #f39c12;
+        }
+
+        .status-confirmed {
+            background-color: #3498db;
+        }
+
+        .status-shipping {
+            background-color: #e74c3c;
+        }
+
+        .status-shipped {
+            background-color: #9b59b6;
+        }
+
+        .status-completed {
+            background-color: #2ecc71;
+        }
+
+        .status-cancelled {
+            background-color: #7f8c8d;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .navbar {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .navbar .nav-links {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+
+            .filter-form {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .filter-form .form-field {
+                width: 100%;
+            }
+
+            .rental-table {
+                font-size: 12px;
+            }
+
+            .rental-table th, .rental-table td {
+                padding: 10px;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .rental-table {
+                display: block;
+                overflow-x: auto;
+            }
+        }
+
+    </style>
 </head>
 <body>
-history
+<!-- Navigation Bar -->
+<nav class="navbar" role="navigation">
+    <a th:href="@{/customer}" class="logo">CRS</a>
+    <div class="nav-links">
+        <a th:href="@{/customer}">Trang chủ</a>
+        <a th:href="@{/customer/cars}">Tất cả ô tô</a>
+        <a th:href="@{/customer/rental-history}">Lịch sử thuê xe</a>
+        <a th:href="@{/customer/deposit}">Nạp tiền</a>
+        <a th:href="@{/customer/profile}" class="profile-icon">P</a>
+        <a th:href="@{/auth/logout}">Đăng xuất</a>
+    </div>
+</nav>
 
+
+<!-- Filter Section -->
+<section class="filter-section">
+    <h2>Lọc đơn thuê xe</h2>
+    <form class="filter-form" th:action="@{/customer/rental-history}" method="get">
+        <div class="form-field">
+            <label>Trạng thái</label>
+            <select name="status">
+                <option value="">Tất cả trạng thái</option>
+                <option value="Pending">Chờ xác nhận</option>
+                <option value="Confirmed">Đã xác nhận</option>
+                <option value="Shipping">Đang giao</option>
+                <option value="Shipped">Đã giao</option>
+                <option value="Completed">Hoàn thành</option>
+                <option value="Cancelled">Đã hủy</option>
+            </select>
+        </div>
+
+        <div class="form-field">
+            <label>Ngày thuê</label>
+            <input type="date" name="pickupDate" placeholder="Ngày nhận xe">
+        </div>
+
+        <div class="form-field">
+            <label>Ngày trả</label>
+            <input type="date" name="returnDate" placeholder="Ngày trả xe">
+        </div>
+
+        <div class="form-field">
+            <label>Giá thuê (VNĐ)</label>
+            <input type="number" name="rentPrice" placeholder="Giá thuê" step="10000">
+        </div>
+
+        <div class="form-field">
+            <label>Số ngày thuê</label>
+            <input type="number" name="periodDay" placeholder="Số ngày thuê">
+        </div>
+        <div class="form-field">
+            <button type="submit" class="filter-button">Lọc</button>
+        </div>
+    </form>
+</section>
+
+
+<!-- Rental Table Section -->
+<section class="rental-table-section">
+    <h2>Danh sách đơn thuê xe</h2>
+    <table class="rental-table">
+        <thead>
+        <tr>
+            <th>Tên khách hàng</th>
+            <th>Tên xe</th>
+            <th>Ngày nhận</th>
+            <th>Ngày trả</th>
+            <th>Giá thuê</th>
+            <th>Số ngày</th>
+            <th>Trạng thái</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="rental : ${listRental}">
+            <td th:text="${rental.customer.customerName}">Tên khách hàng</td>
+            <td th:text="${rental.car.carName}">Tên xe</td>
+            <td th:text="${#temporals.format(rental.pickupDate, 'dd/MM/yyyy')}">Ngày nhận</td>
+            <td th:text="${#temporals.format(rental.returnDate, 'dd/MM/yyyy')}">Ngày trả</td>
+            <td th:text="${rental.rentPrice} + ' VNĐ'">Giá thuê</td>
+            <td th:text="${rental.periodDay}">Số ngày</td>
+            <td>
+                <span class="status" th:classappend="'status-' + ${rental.status.toLowerCase()}" th:text="${rental.status}">Trạng thái</span>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+</section>
 </body>
 </html>

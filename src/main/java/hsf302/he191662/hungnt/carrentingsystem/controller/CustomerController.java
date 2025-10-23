@@ -66,7 +66,19 @@ public class CustomerController {
     }
 
     @GetMapping("rental-history")
-    public String rentalHistory() {
+    public String rentalHistory(Model model, HttpServletRequest request, HttpSession session, RedirectAttributes redirectAttributes) {
+        Account account = (Account) session.getAttribute("account");
+        if(account==null) {
+            redirectAttributes.addFlashAttribute("error", "Có lỗi cần đăng nhập lại.");
+            return "redirect:/auth/logout";
+        }
+        Customer customer= customerService.findByAccountId(account.getAccountId());
+        if(customer==null) {
+            redirectAttributes.addFlashAttribute("error", "Có lỗi cần đăng nhập lại.");
+            return "redirect:/auth/logout";
+        }
+        List<CarRental> listRental= carRentalService.findByUserId(customer.getCustomerId());
+        model.addAttribute("listRental", listRental);
         return "/customer/rental-history";
     }
 
