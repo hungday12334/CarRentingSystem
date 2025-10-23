@@ -9,4 +9,5 @@ public interface CarService {
     public List<Car> findAll();
     public List<String> findDistinctByColor();
     public List<Car> filter(String name, String color, String status, String producerId, String year, String priceFrom, String priceTo);
+    public Car findById(Long id);
 }

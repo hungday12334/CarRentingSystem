@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CRS - Customer Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #f4f4f9;
+            color: #333;
+        }
+
+        /* Navigation Bar */
+        .navbar {
+            background-color: #1a2b49;
+            padding: 15px 30px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .navbar .logo {
+            font-size: 24px;
+            font-weight: bold;
+            color: #ffffff;
+            text-decoration: none;
+        }
+
+        .navbar .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .navbar .nav-links a {
+            color: #ffffff;
+            text-decoration: none;
+            font-size: 16px;
+            transition: color 0.3s;
+        }
+
+        .navbar .nav-links a:hover {
+            color: #00aaff;
+        }
+
+        .navbar .nav-links .profile-icon {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background-color: #ffffff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #1a2b49;
+            font-weight: bold;
+            text-decoration: none;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .navbar {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .navbar .nav-links {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+        }
+        .car-detail-container {
+            max-width: 1000px;
+            margin: 40px auto;
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px #ccc;
+        }
+
+        .car-info {
+            display: flex;
+            gap: 30px;
+            margin-bottom: 20px;
+        }
+
+        .car-image {
+            width: 400px;
+            height: 250px;
+            object-fit: cover;
+            border-radius: 10px;
+        }
+
+        .rent-section {
+            margin-top: 20px;
+            padding: 20px;
+            background: #eaf4f4;
+            border-radius: 10px;
+        }
+
+        .rent-section input {
+            margin: 10px 10px 10px 0;
+            padding: 5px;
+        }
+
+        button {
+            background-color: #2b6777;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #1f4e58;
+        }
+
+        .review-section {
+            margin-top: 30px;
+        }
+
+        .review-card {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 10px;
+            border: 1px solid #ddd;
+        }
+
+    </style>
+</head>
+<body>
+<!-- Navigation Bar -->
+<nav class="navbar">
+    <a th:href="@{/customer}" class="logo">CRS</a>
+    <div class="nav-links">
+        <a th:href="@{/customer}">Trang chủ</a>
+        <a th:href="@{/customer/cars}">Tất cả ô tô</a>
+        <a th:href="@{/customer/rental-history}">Lịch sử thuê xe</a>
+        <a th:href="@{/customer/deposit}">Nạp tiền</a>
+        <a th:href="@{/customer/profile}" class="profile-icon">P</a>
+        <a th:href="@{/auth/logout}">Đăng xuất</a>
+    </div>
+</nav>
+
+<!-- Thông tin chi tiết -->
+<section class="car-detail-container">
+
+    <!-- Hình ảnh & thông tin -->
+    <div class="car-info">
+        <img th:src="${car.imageUrl}" alt="Ảnh xe" class="car-image">
+
+        <div class="car-content">
+            <h2 th:text="${car.carName}"></h2>
+            <p><strong>Năm sản xuất:</strong> <span th:text="${car.carModelYear}"></span></p>
+            <p><strong>Màu sắc:</strong> <span th:text="${car.color}"></span></p>
+            <p><strong>Sức chứa:</strong> <span th:text="${car.capacity} + ' chỗ'"></span></p>
+            <!-- Giá thuê/ngày: thêm data-value để JS đọc số "sạch" -->
+            <p><strong>Giá thuê/ngày:</strong>
+                <span id="price"
+                      th:text="${#numbers.formatDecimal(car.rentPrice, 0, 'POINT', 0, 'COMMA')}"
+                      th:attr="data-value=${car.rentPrice}"></span> VNĐ
+            </p>
+            <p><strong>Nhà sản xuất:</strong> <span th:text="${car.producer.producerName}"></span></p>
+            <p><strong>Địa chỉ:</strong> <span th:text="${car.address}"></span></p>
+            <p><strong>Mô tả:</strong></p>
+            <p th:text="${car.description}"></p>
+        </div>
+    </div>
+
+    <!-- Form thuê xe (thêm id cho form, span hiển thị số ngày và div lỗi) -->
+    <div class="rent-section">
+        <h3>Thuê xe ngay</h3>
+        <form id="rentForm" th:action="@{/customer/rent}" method="post">
+            <input type="hidden" name="carId" th:value="${car.carId}" />
+
+            <label for="startDate">Từ ngày:</label>
+            <input type="date" id="startDate" name="startDate" required>
+
+            <label for="endDate">Đến ngày:</label>
+            <input type="date" id="endDate" name="endDate" required>
+
+            <!-- Hiển thị số ngày thuê và tổng tiền -->
+            <div class="total">
+                <p><strong>Số ngày thuê:</strong> <span id="daysCount">0</span></p>
+                <p><strong>Tổng tiền (ước tính):</strong>
+                    <span id="totalPrice">0</span> VNĐ
+                </p>
+            </div>
+
+            <!-- Nơi hiển thị lỗi -->
+            <div id="rentError" style="color: #b00020; margin:8px 0;"></div>
+
+            <button type="submit" id="rentSubmit">Xác nhận thuê</button>
+        </form>
+    </div>
+
+<!--    &lt;!&ndash; Review &ndash;&gt;-->
+<!--    <section class="review-section">-->
+<!--        <h3>Đánh giá từ khách hàng</h3>-->
+<!--        <div th:if="${#lists.isEmpty(listReview)}">-->
+<!--            <p>Chưa có đánh giá nào cho xe này.</p>-->
+<!--        </div>-->
+
+<!--        <div th:each="review : ${listReview}" class="review-card">-->
+<!--            <h4 th:text="${review.customerName}"></h4>-->
+<!--            <p class="rating">⭐ <span th:text="${review.rating}"></span>/5</p>-->
+<!--            <p class="comment" th:text="${review.comment}"></p>-->
+<!--            <p class="date" th:text="${#temporals.format(review.reviewDate, 'dd/MM/yyyy')}"></p>-->
+<!--        </div>-->
+<!--    </section>-->
+</section>
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        const start = document.getElementById("startDate");
+        const end = document.getElementById("endDate");
+        const total = document.getElementById("totalPrice");
+        const daysCount = document.getElementById("daysCount");
+        const priceEl = document.getElementById("price");
+        const errorEl = document.getElementById("rentError");
+        const submitBtn = document.getElementById("rentSubmit");
+        const form = document.getElementById("rentForm");
+
+        // Lấy giá sạch: ưu tiên dataset, fallback remove non-digits
+        let price = NaN;
+        if (priceEl && priceEl.dataset && priceEl.dataset.value) {
+            price = parseFloat(priceEl.dataset.value);
+        }
+        if (!isFinite(price)) {
+            const raw = priceEl ? priceEl.textContent : "";
+            price = parseFloat(raw.replace(/[^\d.-]/g, "")) || 0;
+        }
+
+        // Helper: format date -> yyyy-mm-dd
+        function toISODate(d) {
+            const y = d.getFullYear();
+            const m = String(d.getMonth() + 1).padStart(2, "0");
+            const day = String(d.getDate()).padStart(2, "0");
+            return `${y}-${m}-${day}`;
+        }
+
+        // Thiết lập min cho startDate là ngày mai
+        const today = new Date();
+        const tomorrow = new Date(today);
+        tomorrow.setDate(today.getDate() + 1);
+        start.min = toISODate(tomorrow);
+
+        // Khi load lần đầu, set end.min = start.min
+        end.min = start.min;
+
+        // Validation + tính toán
+        function validateAndCalculate() {
+            errorEl.textContent = "";
+            submitBtn.disabled = false;
+            total.textContent = "0";
+            daysCount.textContent = "0";
+
+            // nếu chưa chọn đủ
+            if (!start.value || !end.value) {
+                return;
+            }
+
+            const s = new Date(start.value);
+            const e = new Date(end.value);
+
+            // rule 1: start phải >= ngày mai
+            const minStart = new Date(toISODate(tomorrow));
+            minStart.setHours(0,0,0,0);
+            if (s < minStart) {
+                errorEl.textContent = "Ngày bắt đầu phải từ ngày mai trở đi.";
+                submitBtn.disabled = true;
+                return;
+            }
+
+            // rule 2: end >= start
+            if (e < s) {
+                errorEl.textContent = "Ngày kết thúc phải cùng hoặc sau ngày bắt đầu.";
+                submitBtn.disabled = true;
+                return;
+            }
+
+            // tính số ngày (bao gồm cả ngày bắt đầu và kết thúc)
+            const msPerDay = 1000 * 60 * 60 * 24;
+            const diffDays = Math.floor((e - s) / msPerDay) + 1;
+
+            // rule 3: tối đa 30 ngày
+            const MAX_DAYS = 30;
+            if (diffDays > MAX_DAYS) {
+                errorEl.textContent = `Thời gian thuê tối đa là ${MAX_DAYS} ngày. Bạn đang chọn ${diffDays} ngày.`;
+                submitBtn.disabled = true;
+                return;
+            }
+
+            // Nếu tất cả hợp lệ -> tính tiền
+            const totalPrice = diffDays * price;
+
+            // Hiển thị
+            daysCount.textContent = diffDays;
+            // đảm bảo hiển thị số với phân ngăn hàng nghìn theo locale
+            total.textContent = totalPrice.toLocaleString("vi-VN");
+
+            // no error
+            errorEl.textContent = "";
+            submitBtn.disabled = false;
+        }
+
+        // Khi start thay đổi, cập nhật end.min để không cho chọn < start
+        start.addEventListener("change", () => {
+            if (start.value) {
+                // set end.min = start.value
+                end.min = start.value;
+                // nếu end < start thì clear end (đề xuất) hoặc tự set end = start
+                if (end.value && new Date(end.value) < new Date(start.value)) {
+                    end.value = start.value;
+                }
+            } else {
+                // nếu xóa start, reset end.min về ngày mai
+                end.min = start.min;
+            }
+            validateAndCalculate();
+        });
+
+        end.addEventListener("change", validateAndCalculate);
+
+        // cũng validate khi user nhập (typing) để thông báo nhanh hơn
+        start.addEventListener("input", validateAndCalculate);
+        end.addEventListener("input", validateAndCalculate);
+
+        // prevent submit nếu disabled (thêm an toàn)
+        form.addEventListener("submit", (ev) => {
+            if (submitBtn.disabled) {
+                ev.preventDefault();
+            }
+        });
+    });
+</script>
+
+</body>
+</html>

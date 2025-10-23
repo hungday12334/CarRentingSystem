@@ -31,19 +31,31 @@ public class CarRental implements Serializable {
     @Column(name = "rent_price", nullable = false)
     private Double rentPrice;
 
+    @Column(name="period_day")
+    private Integer periodDay;
+
     @Column(name = "status", nullable = false)
     private String status;
 
     public CarRental() {
     }
 
-    public CarRental(Customer customer, Car car, LocalDate pickupDate, LocalDate returnDate, Double rentPrice, String status) {
+    public CarRental(Customer customer, Car car, LocalDate pickupDate, LocalDate returnDate, Double rentPrice, Integer periodDay, String status) {
         this.customer = customer;
         this.car = car;
         this.pickupDate = pickupDate;
         this.returnDate = returnDate;
         this.rentPrice = rentPrice;
+        this.periodDay = periodDay;
         this.status = status;
+    }
+
+    public Integer getPeriodDay() {
+        return periodDay;
+    }
+
+    public void setPeriodDay(Integer periodDay) {
+        this.periodDay = periodDay;
     }
 
     public Long getRentalId() {

@@ -87,5 +87,12 @@ public class CarServiceImpl implements CarService {
                 priceFromDouble,
                 priceToDouble
         );
+
+
+    }
+
+    @Override
+    public Car findById(Long id) {
+        return carRepository.findById(id).orElse(null);
     }
 }

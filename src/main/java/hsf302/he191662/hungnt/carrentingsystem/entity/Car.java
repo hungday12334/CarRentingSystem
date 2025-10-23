@@ -48,6 +48,9 @@ public class Car implements Serializable {
     @Column(name = "status", nullable = false)
     private String status;
 
+    @Column(name = "ish_idden",nullable = false, columnDefinition = "bit default 0")
+    private boolean isHiden=false;
+
     @Column(name = "address")
     private String address;
 
@@ -72,6 +75,21 @@ public class Car implements Serializable {
         this.rentPrice = rentPrice;
         this.status = status;
         this.carName = carName;
+    }
+    public Car(String carName, String imageUrl, Integer carModelYear, String color, Integer capacity, Integer rented, String description, LocalDate importDate, CarProducer producer, Double rentPrice, String status, boolean isHiden, String address) {
+        this.carName = carName;
+        this.imageUrl = imageUrl;
+        this.carModelYear = carModelYear;
+        this.color = color;
+        this.capacity = capacity;
+        this.rented = rented;
+        this.description = description;
+        this.importDate = importDate;
+        this.producer = producer;
+        this.rentPrice = rentPrice;
+        this.status = status;
+        this.isHiden = isHiden;
+        this.address = address;
     }
 
     public String getImageUrl() {

@@ -34,4 +34,6 @@ public interface CarRepository extends JpaRepository<Car,Long> {
             @Param("priceTo") Double priceTo
     );
 
+    public Car findByCarId(Long carId);
+
 }

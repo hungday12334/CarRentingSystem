@@ -1,8 +1,10 @@
 package hsf302.he191662.hungnt.carrentingsystem.controller;
 
 import hsf302.he191662.hungnt.carrentingsystem.entity.Account;
+import hsf302.he191662.hungnt.carrentingsystem.entity.Car;
 import hsf302.he191662.hungnt.carrentingsystem.entity.Customer;
 import hsf302.he191662.hungnt.carrentingsystem.service.*;
+import hsf302.he191662.hungnt.carrentingsystem.util.Validation;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -77,6 +79,7 @@ public class CustomerController {
 
     @PostMapping("/profile")
     public String profilePost(HttpServletRequest request, Model model, HttpSession session) {
+        Validation valid = new Validation();
         // Kiểm tra session
         Account account = (Account) session.getAttribute("account");
         if (account == null) {
@@ -94,45 +97,58 @@ public class CustomerController {
         String email = request.getParameter("email");
         String password = request.getParameter("password");
 
+        Customer customer = customerService.findByCustomerId(customerId);
         // Validation
         if (customerName == null || customerName.trim().isEmpty()) {
             model.addAttribute("error", "Họ và tên không được để trống.");
-            model.addAttribute("customer", customerService.findByCustomerId(customerId));
+            model.addAttribute("customer", customer);
             return "customer/profile";
         }
+
 
         // Kiểm tra customerId khớp với tài khoản
         if (!customerId.equals(account.getCustomer().getCustomerId())) {
             model.addAttribute("error", "Không có quyền cập nhật thông tin này.");
-            model.addAttribute("customer", customerService.findByCustomerId(customerId));
+            model.addAttribute("customer", customer);
             return "customer/profile";
         }
 
         // Validate email
-        String emailRegex = "^[A-Za-z0-9+_.-]+@(.+)$";
-        if (email == null || !Pattern.matches(emailRegex, email)) {
+        if (!valid.isValidEmail(email)) {
             model.addAttribute("error", "Email không hợp lệ.");
-            model.addAttribute("customer", customerService.findByCustomerId(customerId));
+            model.addAttribute("customer", customer);
             return "customer/profile";
         }
 
         // Validate mobile
-        String mobileRegex = "^[0-9]{10}$";
-        if (mobile != null && !mobile.isEmpty() && !Pattern.matches(mobileRegex, mobile)) {
+        if (!valid.isValidVietnamPhone(mobile)) {
             model.addAttribute("error", "Số điện thoại phải có 10 chữ số.");
-            model.addAttribute("customer", customerService.findByCustomerId(customerId));
+            model.addAttribute("customer", customer);
             return "customer/profile";
         }
 
         // Validate identityCard và licenceNumber
-        if (identityCard != null && identityCard.length() != 12) {
-            model.addAttribute("error", "CMND/CCCD phải 12 ký tự.");
-            model.addAttribute("customer", customerService.findByCustomerId(customerId));
+        try{
+            if (identityCard != null && identityCard.length() != 12) {
+                model.addAttribute("error", "CMND/CCCD phải 12 ký tự.");
+                model.addAttribute("customer", customer);
+                return "customer/profile";
+            }
+        }catch(Exception e){
+            model.addAttribute("error", "CMND/CCCD đã tồn tại.");
+            model.addAttribute("customer", customer);
             return "customer/profile";
         }
-        if (licenceNumber != null && licenceNumber.length() != 12) {
-            model.addAttribute("error", "Số GPLX phải 12 ký tự.");
-            model.addAttribute("customer", customerService.findByCustomerId(customerId));
+
+        try{
+            if (licenceNumber != null && licenceNumber.length() != 12) {
+                model.addAttribute("error", "Số GPLX phải 12 ký tự.");
+                model.addAttribute("customer", customer);
+                return "customer/profile";
+            }
+        }catch(Exception e){
+            model.addAttribute("error", "GPLX đã tồn tại.");
+            model.addAttribute("customer", customer);
             return "customer/profile";
         }
 
@@ -142,18 +158,21 @@ public class CustomerController {
         LocalDate now = LocalDate.now();
         if (birthday != null && birthday.isAfter(now)) {
             model.addAttribute("error", "Ngày sinh không được trong tương lai.");
-            model.addAttribute("customer", customerService.findByCustomerId(customerId));
+            model.addAttribute("customer", customer);
             return "customer/profile";
         }
         if (licenceDate != null && licenceDate.isAfter(now)) {
             model.addAttribute("error", "Ngày cấp GPLX không được trong tương lai.");
-            model.addAttribute("customer", customerService.findByCustomerId(customerId));
+            model.addAttribute("customer", customer);
             return "customer/profile";
         }
 
-        // Tạo đối tượng Customer
-        Customer customer = new Customer();
-        customer.setCustomerId(customerId);
+        if(password==null||password.trim().isEmpty()||password.length()<6){
+            model.addAttribute("error", "Mật khẩu không được để trống và phải nhất 6 kí tự.");
+            model.addAttribute("customer", customer);
+            return "customer/profile";
+        }
+
         customer.setCustomerName(customerName);
         customer.setMobile(mobile);
         customer.setBirthday(birthday);
@@ -172,7 +191,7 @@ public class CustomerController {
         }
 
         // Load lại customer để hiển thị
-        model.addAttribute("customer", customerService.findByCustomerId(customerId));
+        model.addAttribute("customer", customer);
         return "customer/profile";
     }
     @GetMapping("deposit")
@@ -209,5 +228,24 @@ public class CustomerController {
             return "/customer/deposit";
         }
         return "/customer/deposit";
+    }
+
+    @GetMapping("car-detail")
+    public String carDetail(Model model, HttpServletRequest request) {
+        String carId = request.getParameter("carId");
+        model.addAttribute("carId", carId);
+        try{
+            Long id = Long.parseLong(carId);
+            Car car = carService.findById(id);
+            if(car==null||car.getCarId()==null){
+                model.addAttribute("error", "Sản phẩm không tồn tại.");
+                return "/customer/cars";
+            }
+            model.addAttribute("car", car);
+            return "/customer/car-detail";
+        }catch(Exception e){
+            model.addAttribute("error", "Sản phẩm không tồn tại.");
+            return "/customer/cars";
+        }
     }
 }
