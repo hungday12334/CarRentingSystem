@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="Hệ thống thuê xe - Quản lý đơn thuê xe của bạn">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <title>CRS - Customer Dashboard</title>
     <style>
         * {
@@ -254,6 +255,23 @@
                 overflow-x: auto;
             }
         }
+        .btn-cancel {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 32px;
+            height: 32px;
+            background-color: #e74c3c; /* đỏ */
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+
+        .btn-cancel:hover {
+            background-color: #c0392b; /* đỏ đậm hơn khi hover */
+        }
 
     </style>
 </head>
@@ -321,6 +339,7 @@
     <table class="rental-table">
         <thead>
         <tr>
+            <th></th>
             <th>Tên khách hàng</th>
             <th>Tên xe</th>
             <th>Ngày nhận</th>
@@ -332,6 +351,16 @@
         </thead>
         <tbody>
         <tr th:each="rental : ${listRental}">
+            <td>
+                <form th:action="@{/customer/rental-history/cancel}" method="post">
+                    <button type="button"
+                            class="btn-cancel"
+                            th:attr="data-id=${rental.rentalId}"
+                            title="Huỷ đơn">
+                        <i class="fa-solid fa-ban"></i>
+                    </button>
+                </form>
+            </td>
             <td th:text="${rental.customer.customerName}">Tên khách hàng</td>
             <td th:text="${rental.car.carName}">Tên xe</td>
             <td th:text="${#temporals.format(rental.pickupDate, 'dd/MM/yyyy')}">Ngày nhận</td>
