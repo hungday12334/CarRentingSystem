@@ -291,7 +291,7 @@ public class CustomerController {
             long dayCount =ChronoUnit.DAYS.between(rentDate, returnDate)+1;
             Integer days = Integer.parseInt(dayCount+"");
             Double rentAmount= days*car.getRentPrice();
-            CarRental carRental = new CarRental(customer, car, rentDate, returnDate, rentAmount, days, "pending");
+            CarRental carRental = new CarRental(customer, car, rentDate, returnDate, rentAmount, days, "pending", LocalDate.now(), LocalDate.now());
             Double balance = customer.getBalance()-rentAmount;
             if(balance<0){
                 redirectAttributes.addFlashAttribute("error","Bạn không đủ tiền để thanh toán.");
@@ -307,6 +307,63 @@ public class CustomerController {
             return "redirect:/customer/rental-history";
         }catch(Exception e){
             redirectAttributes.addFlashAttribute("error","Có lỗi xảy ra trong qus trình xử lý. Vui long đăng nhập lại.");
+            return "redirect:/auth/logout";
+        }
+    }
+    @PostMapping("/rental-history/cancel")
+    public String cancelRental(Model model, HttpServletRequest request, HttpSession session, RedirectAttributes redirectAttributes) {
+        String sCarRentalId = request.getParameter("rentalId");
+        if(sCarRentalId==null||sCarRentalId.trim().isEmpty()){
+            model.addAttribute("error","Đơn hàng không tồn tại.");
+            return "/customer/rental-history";
+        }
+        try{
+            Long rentalId = Long.parseLong(sCarRentalId);
+            CarRental carRental = carRentalService.findById(rentalId);
+            if(carRental==null){
+                model.addAttribute("error","Đơn hàng không tồn tại.");
+                return "/customer/rental-history";
+            }
+            LocalDate today = LocalDate.now();
+            LocalDate  updateDate = carRental.getUpdateAt();
+            Customer customer = carRental.getCustomer();
+
+            if("pending".equals(carRental.getStatus())){
+                //Neu pending thi cho huy thoai mai
+                customer.setBalance(customer.getBalance()+carRental.getRentPrice());
+                customerService.save(customer);
+                //huy
+                carRental.setStatus("cancelled");
+                carRentalService.save(carRental);
+                redirectAttributes.addFlashAttribute("success","Bạn đã hủy thành công  đơn đang ở trạng thái 'Pending' nên được hoàn 100% tiền vào ví.");
+                return "redirect:/customer/rental-history";
+            }else if("confirmed".equals(carRental.getStatus())){
+                //Neu da duoc chu xe confirm roi thi phai check
+                if(today.isAfter(updateDate)){
+                    //Neu sau do moi huy thi nhan lai 60%
+                    customer.setBalance(customer.getBalance()+carRental.getRentPrice()*0.6);
+                    customerService.save(customer);
+                    //huy
+                    carRental.setStatus("cancelled");
+                    carRentalService.save(carRental);
+                    redirectAttributes.addFlashAttribute("success","Bạn đã hủy thành công  đơn đang ở trạng thái 'Confirmed' nhưng không cùng ngày 'Confirmed' nên chỉ được hoàn 60% tổng số tiền.");
+                    return "redirect:/customer/rental-history";
+                }else{
+                    //Neu huy trong ngay confirm duoc hoan tien 100%
+                    customer.setBalance(customer.getBalance()+carRental.getRentPrice());
+                    customerService.save(customer);
+                    carRental.setStatus("cancelled");
+                    carRentalService.save(carRental);
+                    redirectAttributes.addFlashAttribute("success","Bạn đã hủy thành công  đơn cùng ngày chủ xe 'Confirmed' nên được hoàn 100% tiền vào ví.");
+                    return "redirect:/customer/rental-history";
+                }
+            }else{
+                //Đang trong shipping, shipped, completed, cancelled
+                redirectAttributes.addFlashAttribute("error","Bạn không thể hủy đơn này.");
+                return "redirect:/customer/rental-history";
+            }
+        }catch(Exception e){
+            redirectAttributes.addFlashAttribute("error", "Có lỗi trong quá trình xử lý vui lòng đăng nhập lại.");
             return "redirect:/auth/logout";
         }
     }

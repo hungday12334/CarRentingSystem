@@ -272,6 +272,125 @@
         .btn-cancel:hover {
             background-color: #c0392b; /* đỏ đậm hơn khi hover */
         }
+        .error, .success {
+            text-align: center;
+            margin-bottom: 10px;
+        }
+        .error {
+            color: #d93025; /* đỏ đậm */
+            border: 2px solid #d93025;
+            background-color: #fff; /* nền trắng */
+            padding: 10px 14px;
+            border-radius: 6px;
+            font-weight: 600;
+            margin-top: 10px;
+        }
+
+        .success {
+            color: #137333; /* xanh đậm */
+            border: 2px solid #137333;
+            background-color: #fff; /* nền trắng */
+            padding: 10px 14px;
+            border-radius: 6px;
+            font-weight: 600;
+            margin-top: 10px;
+        }
+        /* Nút hủy màu đỏ */
+        .btn-cancel {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 36px;
+            height: 36px;
+            background-color: #e74c3c;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background-color 0.25s ease;
+        }
+
+        .btn-cancel:hover {
+            background-color: #c0392b;
+        }
+
+        /* Lớp phủ làm mờ nền */
+        .alert-overlay {
+            display: none; /* Ẩn mặc định */
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* Hộp thông báo */
+        .alert-box {
+            background: #fff;
+            border-radius: 12px;
+            padding: 24px 30px;
+            text-align: center;
+            max-width: 380px;
+            box-shadow: 0 4px 25px rgba(0,0,0,0.2);
+            animation: fadeIn 0.25s ease;
+        }
+
+        .alert-box h3 {
+            margin: 0 0 10px;
+            font-size: 1.2rem;
+            color: #222;
+        }
+
+        .alert-box p {
+            font-size: 1rem;
+            color: #444;
+        }
+
+        /* Nút trong popup */
+        .alert-actions {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 18px;
+        }
+
+        .btn-confirm {
+            background-color: #27ae60;
+            border: none;
+            color: white;
+            padding: 8px 18px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .btn-confirm:hover {
+            background-color: #219150;
+        }
+
+        .btn-close {
+            background-color: #bdc3c7;
+            border: none;
+            color: #2c3e50;
+            padding: 8px 18px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .btn-close:hover {
+            background-color: #95a5a6;
+        }
+
+        /* Hiệu ứng mờ dần */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.9); }
+            to { opacity: 1; transform: scale(1); }
+        }
 
     </style>
 </head>
@@ -335,6 +454,8 @@
 
 <!-- Rental Table Section -->
 <section class="rental-table-section">
+    <div th:if="${error}" class="error" th:text="${error}"></div>
+    <div th:if="${success}" class="success" th:text="${success}"></div>
     <h2>Danh sách đơn thuê xe</h2>
     <table class="rental-table">
         <thead>
@@ -352,14 +473,13 @@
         <tbody>
         <tr th:each="rental : ${listRental}">
             <td>
-                <form th:action="@{/customer/rental-history/cancel}" method="post">
-                    <button type="button"
-                            class="btn-cancel"
-                            th:attr="data-id=${rental.rentalId}"
-                            title="Huỷ đơn">
+                <form th:action="@{/customer/rental-history/cancel}" method="post" class="cancel-form">
+                    <input type="hidden" name="rentalId" th:value="${rental.rentalId}">
+                    <button type="button" class="btn-cancel" title="Huỷ đơn">
                         <i class="fa-solid fa-ban"></i>
                     </button>
                 </form>
+
             </td>
             <td th:text="${rental.customer.customerName}">Tên khách hàng</td>
             <td th:text="${rental.car.carName}">Tên xe</td>
@@ -373,6 +493,46 @@
         </tr>
         </tbody>
     </table>
+    <!-- Popup xác nhận -->
+    <div id="cancelAlert" class="alert-overlay">
+        <div class="alert-box">
+            <h3>Xác nhận huỷ đơn</h3>
+            <p>Bạn có chắc chắn muốn huỷ đơn thuê xe này?</p>
+            <div class="alert-actions">
+                <button id="confirmCancel" class="btn-confirm">Có</button>
+                <button id="cancelClose" class="btn-close">Không</button>
+            </div>
+        </div>
+    </div>
 </section>
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const alertOverlay = document.getElementById('cancelAlert');
+        const confirmBtn = document.getElementById('confirmCancel');
+        const cancelBtn = document.getElementById('cancelClose');
+        let activeForm = null;
+
+        // Khi click nút hủy
+        document.querySelectorAll('.cancel-form').forEach(form => {
+            const btn = form.querySelector('.btn-cancel');
+            btn.addEventListener('click', () => {
+                activeForm = form;
+                alertOverlay.style.display = 'flex';
+            });
+        });
+
+        // Xác nhận huỷ
+        confirmBtn.addEventListener('click', () => {
+            if (activeForm) activeForm.submit();
+            alertOverlay.style.display = 'none';
+        });
+
+        // Hủy popup
+        cancelBtn.addEventListener('click', () => {
+            alertOverlay.style.display = 'none';
+        });
+    });
+</script>
+
 </body>
 </html>

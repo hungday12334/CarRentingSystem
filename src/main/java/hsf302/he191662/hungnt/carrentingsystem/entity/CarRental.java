@@ -37,10 +37,32 @@ public class CarRental implements Serializable {
     @Column(name = "status", nullable = false)
     private String status; //Pending,Confirmed,Shipping,Shipped, Completed, Cancelled
 
+    @Column(name="create_at")
+    private LocalDate createAt;
+
+    @Column(name="update_at")
+    private LocalDate updateAt;
+
     public CarRental() {
     }
 
-    public CarRental(Customer customer, Car car, LocalDate pickupDate, LocalDate returnDate, Double rentPrice, Integer periodDay, String status) {
+    public LocalDate getCreateAt() {
+        return createAt;
+    }
+
+    public void setCreateAt(LocalDate createAt) {
+        this.createAt = createAt;
+    }
+
+    public LocalDate getUpdateAt() {
+        return updateAt;
+    }
+
+    public void setUpdateAt(LocalDate updateAt) {
+        this.updateAt = updateAt;
+    }
+
+    public CarRental(Customer customer, Car car, LocalDate pickupDate, LocalDate returnDate, Double rentPrice, Integer periodDay, String status, LocalDate createAt, LocalDate updateAt) {
         this.customer = customer;
         this.car = car;
         this.pickupDate = pickupDate;
@@ -48,6 +70,8 @@ public class CarRental implements Serializable {
         this.rentPrice = rentPrice;
         this.periodDay = periodDay;
         this.status = status;
+        this.createAt = createAt;
+        this.updateAt = updateAt;
     }
 
     public Integer getPeriodDay() {
