@@ -1,7 +1,9 @@
 package hsf302.he191662.hungnt.carrentingsystem.controller;
 
+import hsf302.he191662.hungnt.carrentingsystem.dto.ReviewDTO;
 import hsf302.he191662.hungnt.carrentingsystem.entity.Account;
 import hsf302.he191662.hungnt.carrentingsystem.entity.Car;
+import hsf302.he191662.hungnt.carrentingsystem.entity.CarRental;
 import hsf302.he191662.hungnt.carrentingsystem.entity.Customer;
 import hsf302.he191662.hungnt.carrentingsystem.service.*;
 import hsf302.he191662.hungnt.carrentingsystem.util.Validation;
@@ -13,9 +15,10 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import java.time.temporal.ChronoUnit;
 import java.time.LocalDate;
-import java.util.regex.Pattern;
+import java.util.List;
 
 @Controller
 @RequestMapping("/customer")
@@ -26,6 +29,13 @@ public class CustomerController {
     private CarProducerService carProducerService;
     @Autowired
     private CustomerService customerService;
+    @Autowired
+    private ReviewService reviewService;
+    @Autowired
+    private CarRentalService carRentalService;
+
+
+
     @GetMapping
     public String index(Model model) {
         model.addAttribute("listCar", carService.findTop5ByOrderByRentedDesc());
@@ -233,7 +243,6 @@ public class CustomerController {
     @GetMapping("car-detail")
     public String carDetail(Model model, HttpServletRequest request) {
         String carId = request.getParameter("carId");
-        model.addAttribute("carId", carId);
         try{
             Long id = Long.parseLong(carId);
             Car car = carService.findById(id);
@@ -241,11 +250,52 @@ public class CustomerController {
                 model.addAttribute("error", "Sản phẩm không tồn tại.");
                 return "/customer/cars";
             }
+            List<ReviewDTO> listReview = reviewService.findByCarId(id);
+            model.addAttribute("listReview", listReview);
             model.addAttribute("car", car);
             return "/customer/car-detail";
         }catch(Exception e){
             model.addAttribute("error", "Sản phẩm không tồn tại.");
             return "/customer/cars";
+        }
+    }
+
+    @PostMapping("rent")
+    public String rentCar(Model model, HttpServletRequest request, HttpSession session, RedirectAttributes redirectAttributes) {
+        Long customerId = ((Account)session.getAttribute("account")).getAccountId();
+        String sCarId= request.getParameter("carId");
+        try{
+            Long carId = Long.parseLong(sCarId);
+            Customer customer= customerService.findByCustomerId(customerId);
+            Car car= carService.findById(carId);
+            String sRentDate= request.getParameter("startDate");
+            String sReturnDate= request.getParameter("endDate");
+            if(sRentDate==null||sRentDate.trim().isEmpty()||sReturnDate==null||sReturnDate.trim().isEmpty()){
+                redirectAttributes.addFlashAttribute("error", "Vui lòng nhập ngày hợp lệ.");
+                return "redirect:/customer/car-detail?carId="+carId;
+            }
+            LocalDate rentDate = LocalDate.parse(sRentDate);
+            LocalDate returnDate = LocalDate.parse(sReturnDate);
+            long dayCount =ChronoUnit.DAYS.between(rentDate, returnDate)+1;
+            Integer days = Integer.parseInt(dayCount+"");
+            Double rentAmount= days*car.getRentPrice();
+            CarRental carRental = new CarRental(customer, car, rentDate, returnDate, rentAmount, days, "pending");
+            Double balance = customer.getBalance()-rentAmount;
+            if(balance<0){
+                redirectAttributes.addFlashAttribute("error","Bạn không đủ tiền để thanh toán.");
+                return "redirect:/customer/car-detail?carId="+carId;
+            }
+            if(customer.getIdentityCard()==null||customer.getLicenceNumber()==null||customer.getLicenceDate()==null||customer.getIdentityCard().trim().isEmpty()||customer.getLicenceNumber().trim().isEmpty()){
+                redirectAttributes.addFlashAttribute("error","Bạn chưa cập nhật thông tin liên quan đến CCCD và GPLX nên không thuê xe được");
+                return "redirect:/customer/car-detail?carId="+carId;
+            }
+            carRentalService.save(carRental);
+            customer.setBalance(balance);
+            customerService.save(customer);
+            return "redirect:/customer/rental-history";
+        }catch(Exception e){
+            redirectAttributes.addFlashAttribute("error","Có lỗi xảy ra trong qus trình xử lý. Vui long đăng nhập lại.");
+            return "redirect:/auth/logout";
         }
     }
 }

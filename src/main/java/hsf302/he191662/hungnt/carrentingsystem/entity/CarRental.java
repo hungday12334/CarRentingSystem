@@ -35,7 +35,7 @@ public class CarRental implements Serializable {
     private Integer periodDay;
 
     @Column(name = "status", nullable = false)
-    private String status;
+    private String status; //Pending,Confirmed,Shipping,Shipped, Completed, Cancelled
 
     public CarRental() {
     }

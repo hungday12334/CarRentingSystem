@@ -137,7 +137,82 @@
             margin-top: 10px;
             border: 1px solid #ddd;
         }
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            inset: 0;
+            background-color: rgba(0,0,0,0.5);
+        }
+        .modal-content {
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            background: #fff;
+            padding: 24px;
+            border-radius: 10px;
+            width: 400px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+            text-align: center;
+            font-family: Arial, sans-serif;
+        }
+        .modal-content h3 {
+            margin-bottom: 10px;
+            color: #333;
+        }
+        .modal-content p {
+            color: #555;
+            font-size: 14px;
+            margin-bottom: 20px;
+        }
+        .modal-actions {
+            display: flex;
+            justify-content: center;
+            gap: 16px;
+        }
+        .modal-actions button {
+            padding: 8px 18px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        #confirmYes {
+            background-color: #007bff;
+            color: white;
+        }
+        #confirmNo {
+            background-color: #ccc;
+        }
+        #confirmYes:hover {
+            background-color: #0056b3;
+        }
+        #confirmNo:hover {
+            background-color: #aaa;
+        }
+        .error, .success {
+            text-align: center;
+            margin-bottom: 10px;
+        }
+        .error {
+            color: #d93025; /* đỏ đậm */
+            border: 2px solid #d93025;
+            background-color: #fff; /* nền trắng */
+            padding: 10px 14px;
+            border-radius: 6px;
+            font-weight: 600;
+            margin-top: 10px;
+        }
 
+        .success {
+            color: #137333; /* xanh đậm */
+            border: 2px solid #137333;
+            background-color: #fff; /* nền trắng */
+            padding: 10px 14px;
+            border-radius: 6px;
+            font-weight: 600;
+            margin-top: 10px;
+        }
     </style>
 </head>
 <body>
@@ -158,11 +233,14 @@
 <section class="car-detail-container">
 
     <!-- Hình ảnh & thông tin -->
+    <div th:if="${error}" class="error" th:text="${error}"></div>
+    <div th:if="${success}" class="success" th:text="${success}"></div>
     <div class="car-info">
         <img th:src="${car.imageUrl}" alt="Ảnh xe" class="car-image">
 
         <div class="car-content">
             <h2 th:text="${car.carName}"></h2>
+            <p><strong>Ngày đã thuê:</strong> <span th:text="${car.rented}"></span></p>
             <p><strong>Năm sản xuất:</strong> <span th:text="${car.carModelYear}"></span></p>
             <p><strong>Màu sắc:</strong> <span th:text="${car.color}"></span></p>
             <p><strong>Sức chứa:</strong> <span th:text="${car.capacity} + ' chỗ'"></span></p>
@@ -198,30 +276,58 @@
                     <span id="totalPrice">0</span> VNĐ
                 </p>
             </div>
-
             <!-- Nơi hiển thị lỗi -->
             <div id="rentError" style="color: #b00020; margin:8px 0;"></div>
 
             <button type="submit" id="rentSubmit">Xác nhận thuê</button>
         </form>
     </div>
+    <!-- 🔹 Hộp thoại xác nhận -->
+    <div id="confirmModal" class="modal">
+        <div class="modal-content">
+            <h3>Xác nhận thuê xe</h3>
+            <p>Sau khi bạn ấn <b>Đồng ý</b>, chi phí sẽ bị trừ trực tiếp vào ví của bạn.<br>
+                Nếu bạn hủy đơn <b>trong ngày</b> thì sẽ được hoàn <b>100%</b> tiền nếu bạn <b>chưa nhận được xe</b>,
+                nếu không chỉ được hoàn <b>60%</b>.</p>
+            <div class="modal-actions">
+                <button id="confirmYes">Đồng ý</button>
+                <button id="confirmNo">Hủy</button>
+            </div>
+        </div>
+    </div>
 
-<!--    &lt;!&ndash; Review &ndash;&gt;-->
-<!--    <section class="review-section">-->
-<!--        <h3>Đánh giá từ khách hàng</h3>-->
-<!--        <div th:if="${#lists.isEmpty(listReview)}">-->
-<!--            <p>Chưa có đánh giá nào cho xe này.</p>-->
-<!--        </div>-->
+    <!-- Review -->
+    <section class="review-section">
+        <h3>Đánh giá từ khách hàng</h3>
+        <div th:if="${#lists.isEmpty(listReview)}">
+            <p>Chưa có đánh giá nào cho xe này.</p>
+        </div>
 
-<!--        <div th:each="review : ${listReview}" class="review-card">-->
-<!--            <h4 th:text="${review.customerName}"></h4>-->
-<!--            <p class="rating">⭐ <span th:text="${review.rating}"></span>/5</p>-->
-<!--            <p class="comment" th:text="${review.comment}"></p>-->
-<!--            <p class="date" th:text="${#temporals.format(review.reviewDate, 'dd/MM/yyyy')}"></p>-->
-<!--        </div>-->
-<!--    </section>-->
+        <div th:each="review : ${listReview}" class="review-card">
+            <h4 th:text="${review.customerName}"></h4>
+            <p class="rating">⭐ <span th:text="${review.rating}"></span>/5</p>
+            <p class="comment" th:text="${review.content}"></p>
+        </div>
+    </section>
 </section>
 <script>
+    document.getElementById('rentForm').addEventListener('submit', function(e) {
+        e.preventDefault(); // chặn submit ngay
+
+        const modal = document.getElementById('confirmModal');
+        modal.style.display = 'block'; // mở modal
+
+        // Khi ấn Đồng ý
+        document.getElementById('confirmYes').onclick = () => {
+            modal.style.display = 'none';
+            e.target.submit(); // gửi form
+        };
+
+        // Khi ấn Hủy
+        document.getElementById('confirmNo').onclick = () => {
+            modal.style.display = 'none'; // chỉ tắt
+        };
+    });
     document.addEventListener("DOMContentLoaded", () => {
         const start = document.getElementById("startDate");
         const end = document.getElementById("endDate");
@@ -309,7 +415,7 @@
             daysCount.textContent = diffDays;
             // đảm bảo hiển thị số với phân ngăn hàng nghìn theo locale
             total.textContent = totalPrice.toLocaleString("vi-VN");
-
+            // ✅ Gán giá trị vào input ẩn để gửi về backend
             // no error
             errorEl.textContent = "";
             submitBtn.disabled = false;
