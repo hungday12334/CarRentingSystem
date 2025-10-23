@@ -5,6 +5,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.util.List;
+
 public interface CustomerRepository extends JpaRepository<Customer,Long> {
     @Query("select c from Customer c where c.account.accountId = :accountId")
     public Customer findByAccountId(@Param("accountId") Long accountId);
@@ -15,4 +17,6 @@ public interface CustomerRepository extends JpaRepository<Customer,Long> {
 
     @Query("select c from Customer c where c.licenceNumber = :licenceNumber")
     public Customer findByLicenceNumber(@Param("licenceNumber") String licenceNumber);
+    @Query("select c from Customer c where (:customerId is null or c.customerId = :customerId) and(:customerName is null or c.customerName = :customerName)")
+    public List<Customer> findByCustomerIdAndCustomerName(@Param("customerId") Long customerId,@Param("customerName") String customerName);
 }

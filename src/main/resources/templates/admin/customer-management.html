@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản lý khách hàng</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Roboto', sans-serif;
+        }
+
+        body {
+            display: flex;
+            min-height: 100vh;
+            background-color: #f0f2f5;
+        }
+
+        /* Thanh điều hướng bên trái */
+        .sidebar {
+            width: 20%;
+            background-color: #1a2634;
+            color: white;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .sidebar a {
+            color: white;
+            text-decoration: none;
+            font-size: 16px;
+            padding: 12px 15px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .sidebar a:hover {
+            background-color: #3498db;
+            transform: translateX(5px);
+        }
+
+        .sidebar .logo {
+            font-size: 28px;
+            font-weight: 700;
+            text-align: center;
+            margin-bottom: 30px;
+            color: #3498db;
+        }
+
+        /* Khu vực chính bên phải */
+        .main-content {
+            width: 80%;
+            padding: 30px;
+        }
+
+        .filter-section {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 25px;
+            align-items: center;
+            background-color: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+        }
+
+        .filter-section input {
+            padding: 10px;
+            font-size: 14px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            flex: 1;
+            transition: border-color 0.3s;
+        }
+
+        .filter-section input:focus {
+            outline: none;
+            border-color: #3498db;
+        }
+
+        .filter-section button, .create-button {
+            padding: 10px 20px;
+            font-size: 14px;
+            font-weight: 500;
+            border: 2px solid #3498db;
+            background-color: white;
+            color: #3498db;
+            border-radius: 6px;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .filter-section button:hover, .create-button:hover {
+            background-color: #3498db;
+            color: white;
+        }
+
+        /* Bảng dữ liệu */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background-color: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        th, td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        th {
+            background-color: #3498db;
+            color: white;
+            font-weight: 500;
+            font-size: 14px;
+        }
+
+        td {
+            font-size: 14px;
+            color: #2c3e50;
+        }
+
+        tr:hover {
+            background-color: #f8fafc;
+        }
+
+        .action-icons a, .action-icons form {
+            display: inline-block;
+            margin-right: 10px;
+        }
+
+        .action-icons img {
+            width: 20px;
+            height: 20px;
+            vertical-align: middle;
+        }
+
+        .action-icons button {
+            background: none;
+            border: none;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+<!-- Thanh điều hướng bên trái -->
+<div class="sidebar">
+    <a href="/admin/customers" class="logo">CRS</a>
+    <a href="/admin/customers">Quản lý khách hàng</a>
+    <a href="/admin/accounts">Quản lý tài khoản</a>
+    <a href="/admin/cars">Quản lý xe</a>
+    <a href="/admin/rentals">Quản lý thuê xe</a>
+    <a href="/admin/reports">Báo cáo thống kê</a>
+    <a href="/auth/logout">Đăng xuất</a>
+</div>
+
+<!-- Khu vực chính bên phải -->
+<div class="main-content">
+    <!-- Phần lọc -->
+    <div class="filter-section">
+        <input type="number" placeholder="ID khách hàng" th:value="${customerIdFilter}" name="customerIdFilter">
+        <input type="text" placeholder="Tên khách hàng" th:value="${customerNameFilter}" name="customerNameFilter">
+        <button type="button" onclick="filterCustomers()">Lọc</button>
+        <a href="/admin/customers/create" class="create-button">Tạo khách hàng mới</a>
+    </div>
+
+    <!-- Bảng dữ liệu khách hàng -->
+    <table>
+        <thead>
+        <tr>
+            <th></th>
+            <th>ID Khách hàng</th>
+            <th>Tên khách hàng</th>
+            <th>Số điện thoại</th>
+            <th>Ngày sinh</th>
+            <th>CMND/CCCD</th>
+            <th>Số GPLX</th>
+            <th>Ngày cấp GPLX</th>
+            <th>Email</th>
+            <th>Mật khẩu</th>
+            <th>Số dư</th>
+            <th>ID Tài khoản</th>
+        </tr>
+        </thead>
+        <tbody th:if="${customers.isEmpty()}" class="no-data">
+        <tr>
+            <td colspan="12" style="text-align:center;">Không có dữ liệu</td>
+        </tr>
+        </tbody>
+        <tbody th:if="${!customers.isEmpty()}" >
+        <tr th:each="customer : ${customers}">
+            <td class="action-icons">
+                <a th:href="@{/admin/customers/update(customerId=${customer.customerId})}">
+                    <i class="bi bi-person-circle" alt="Sửa thông tin"></i>
+                </a>
+                <form th:action="@{/admin/customers/deactive}" method="post" style="display:inline;">
+                    <input type="hidden" th:value="${customer.customerId}" name="customerId">
+                    <button type="submit">
+                        <i class="bi bi-x-circle" alt="Vô hiệu hóa người dùng."></i>
+                    </button>
+                </form>
+            </td>
+            <td th:text="${customer.customerId}"></td>
+            <td th:text="${customer.customerName}"></td>
+            <td th:text="${customer.mobile}"></td>
+            <td th:text="${customer.birthday}"></td>
+            <td th:text="${customer.identityCard}"></td>
+            <td th:text="${customer.licenceNumber}"></td>
+            <td th:text="${customer.licenceDate}"></td>
+            <td th:text="${customer.email}"></td>
+            <td th:text="${customer.password}"></td>
+            <td th:text="${customer.balance}"></td>
+            <td th:text="${customer.account?.accountId}"></td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+
+<script>
+    function filterCustomers() {
+        const customerId = document.querySelector('input[name="customerIdFilter"]').value;
+        const customerName = document.querySelector('input[name="customerNameFilter"]').value;
+        window.location.href = `/admin/customers?customerId=${customerId}&customerName=${customerName}`;
+    }
+</script>
+</body>
+</html>
