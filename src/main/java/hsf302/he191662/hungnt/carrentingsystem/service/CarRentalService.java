@@ -9,4 +9,5 @@ public interface CarRentalService {
     public void save(CarRental carRental);
     public List<CarRental> findByUserId(Long userId);
     public CarRental findById(Long id);
+    public List<CarRental> filter(String status, Long customerId,String rentalDateFrom, String rentalDateTo, String periodDay, String rentPriceMin, String rentPriceMax);
 }

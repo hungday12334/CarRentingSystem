@@ -21,4 +21,14 @@ public class CustomerServiceImpl implements CustomerService{
     public Customer findByCustomerId(Long customerId) {
         return customerRepository.findByCustomerId(customerId);
     }
+
+    @Override
+    public Customer findByIdentityCard(String identityCard) {
+        return customerRepository.findByIdentityCard(identityCard);
+    }
+
+    @Override
+    public Customer findByLicenceNumber(String licenceNumber) {
+        return customerRepository.findByLicenceNumber(licenceNumber);
+    }
 }

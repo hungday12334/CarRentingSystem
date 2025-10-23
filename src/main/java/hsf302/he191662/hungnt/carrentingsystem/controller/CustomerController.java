@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
 import java.time.temporal.ChronoUnit;
 import java.time.LocalDate;
 import java.util.List;
@@ -35,7 +36,6 @@ public class CustomerController {
     private CarRentalService carRentalService;
 
 
-
     @GetMapping
     public String index(Model model) {
         model.addAttribute("listCar", carService.findTop5ByOrderByRentedDesc());
@@ -46,7 +46,7 @@ public class CustomerController {
     public String cars(Model model, HttpServletRequest request) {
         String carName = request.getParameter("carName");
         String color = request.getParameter("color");
-        String status= request.getParameter("status");
+        String status = request.getParameter("status");
         String producerId = request.getParameter("producerId");
         String year = request.getParameter("year");
         String priceFrom = request.getParameter("priceFrom");
@@ -58,7 +58,7 @@ public class CustomerController {
         model.addAttribute("year", year);
         model.addAttribute("priceFrom", priceFrom);
         model.addAttribute("priceTo", priceTo);
-        model.addAttribute("listCar", carService.filter(carName,color,status,producerId,year,priceFrom,priceTo));
+        model.addAttribute("listCar", carService.filter(carName, color, status, producerId, year, priceFrom, priceTo));
 
         model.addAttribute("listColor", carService.findDistinctByColor());
         model.addAttribute("listProducer", carProducerService.findAll());
@@ -67,31 +67,46 @@ public class CustomerController {
 
     @GetMapping("rental-history")
     public String rentalHistory(Model model, HttpServletRequest request, HttpSession session, RedirectAttributes redirectAttributes) {
-        Account account = (Account) session.getAttribute("account");
-        if(account==null) {
-            redirectAttributes.addFlashAttribute("error", "Có lỗi cần đăng nhập lại.");
-            return "redirect:/auth/logout";
+        try{
+            Account account = (Account) session.getAttribute("account");
+            if (account == null) {
+                redirectAttributes.addFlashAttribute("error", "Có lỗi cần đăng nhập lại.");
+                session.invalidate();
+                return "redirect:/auth/login";
+            }
+            Customer customer = customerService.findByAccountId(account.getAccountId());
+            if (customer == null) {
+                redirectAttributes.addFlashAttribute("error", "Có lỗi cần đăng nhập lại.");
+                session.invalidate();
+                return "redirect:/auth/login";
+            }
+            String status = request.getParameter("status");
+            String pickupDate = request.getParameter("pickupDate");
+            String returnDate = request.getParameter("returnDate");
+            String rentPriceMin = request.getParameter("rentPriceMin");
+            String rentPriceMax = request.getParameter("rentPriceMax");
+            String periodDay = request.getParameter("periodDay");
+
+            List<CarRental> listRental = carRentalService.filter(status,customer.getCustomerId(),pickupDate,returnDate,rentPriceMin,rentPriceMax,periodDay);
+            model.addAttribute("listRental", listRental);
+            return "/customer/rental-history";
+        }catch (Exception e){
+            redirectAttributes.addFlashAttribute("error", "Xảy ra lỗi trong quá trình xử lý. Vui lòng đăng nhập lại");
+            session.invalidate();
+                return "redirect:/auth/login";
         }
-        Customer customer= customerService.findByAccountId(account.getAccountId());
-        if(customer==null) {
-            redirectAttributes.addFlashAttribute("error", "Có lỗi cần đăng nhập lại.");
-            return "redirect:/auth/logout";
-        }
-        List<CarRental> listRental= carRentalService.findByUserId(customer.getCustomerId());
-        model.addAttribute("listRental", listRental);
-        return "/customer/rental-history";
     }
 
     @GetMapping("profile")
     public String profile(Model model, HttpSession session) {
         Account account = (Account) session.getAttribute("account");
-        if(account==null) {
+        if (account == null) {
             model.addAttribute("error", "Session không lưu account");
             return "/customer/profile";
         }
 
-        Customer customer= customerService.findByAccountId(account.getAccountId());
-        if(customer==null) {
+        Customer customer = customerService.findByAccountId(account.getAccountId());
+        if (customer == null) {
             model.addAttribute("error", "Không lấy được customer");
             return "/customer/profile";
         }
@@ -150,25 +165,37 @@ public class CustomerController {
         }
 
         // Validate identityCard và licenceNumber
-        try{
+        try {
             if (identityCard != null && identityCard.length() != 12) {
                 model.addAttribute("error", "CMND/CCCD phải 12 ký tự.");
                 model.addAttribute("customer", customer);
                 return "customer/profile";
+            }else{
+                if(customerService.findByIdentityCard(identityCard)!=null){
+                    model.addAttribute("error", "CMND/CCCD đã tồn tại.");
+                    model.addAttribute("customer", customer);
+                    return "customer/profile";
+                }
             }
-        }catch(Exception e){
+        } catch (Exception e) {
             model.addAttribute("error", "CMND/CCCD đã tồn tại.");
             model.addAttribute("customer", customer);
             return "customer/profile";
         }
 
-        try{
+        try {
             if (licenceNumber != null && licenceNumber.length() != 12) {
                 model.addAttribute("error", "Số GPLX phải 12 ký tự.");
                 model.addAttribute("customer", customer);
                 return "customer/profile";
+            }else{
+                if(customerService.findByLicenceNumber(licenceNumber)!=null){
+                    model.addAttribute("error", "GPLX đã tồn tại.");
+                    model.addAttribute("customer", customer);
+                    return "customer/profile";
+                }
             }
-        }catch(Exception e){
+        } catch (Exception e) {
             model.addAttribute("error", "GPLX đã tồn tại.");
             model.addAttribute("customer", customer);
             return "customer/profile";
@@ -189,7 +216,7 @@ public class CustomerController {
             return "customer/profile";
         }
 
-        if(password==null||password.trim().isEmpty()||password.length()<6){
+        if (password == null || password.trim().isEmpty() || password.length() < 6) {
             model.addAttribute("error", "Mật khẩu không được để trống và phải nhất 6 kí tự.");
             model.addAttribute("customer", customer);
             return "customer/profile";
@@ -216,16 +243,17 @@ public class CustomerController {
         model.addAttribute("customer", customer);
         return "customer/profile";
     }
+
     @GetMapping("deposit")
     public String deposit(Model model, HttpSession session) {
         Account account = (Account) session.getAttribute("account");
-        if(account==null) {
+        if (account == null) {
             model.addAttribute("error", "Session không lưu account");
             return "/customer/deposit";
         }
 
-        Customer customer= customerService.findByAccountId(account.getAccountId());
-        if(customer==null) {
+        Customer customer = customerService.findByAccountId(account.getAccountId());
+        if (customer == null) {
             model.addAttribute("error", "Không lấy được customer");
             return "/customer/deposit";
         }
@@ -237,16 +265,16 @@ public class CustomerController {
     public String depositPost(HttpServletRequest request, Model model, HttpSession session) {
         String sDepositAmount = request.getParameter("depositAmount");
         model.addAttribute("depositAmount", sDepositAmount);
-        try{
+        try {
             Double depositAmount = Double.parseDouble(sDepositAmount);
             Account account = (Account) session.getAttribute("account");
-            Customer customer= customerService.findByAccountId(account.getAccountId());
-            customer.setBalance(customer.getBalance()+depositAmount);
+            Customer customer = customerService.findByAccountId(account.getAccountId());
+            customer.setBalance(customer.getBalance() + depositAmount);
             customerService.save(customer);
             model.addAttribute("balance", customer.getBalance());
             model.addAttribute("success", "Nạp tiền thành công");
-        }catch(Exception e){
-            model.addAttribute("error","Vui lòng nhập số tiền hợp lệ!!!");
+        } catch (Exception e) {
+            model.addAttribute("error", "Vui lòng nhập số tiền hợp lệ!!!");
             return "/customer/deposit";
         }
         return "/customer/deposit";
@@ -255,10 +283,10 @@ public class CustomerController {
     @GetMapping("car-detail")
     public String carDetail(Model model, HttpServletRequest request) {
         String carId = request.getParameter("carId");
-        try{
+        try {
             Long id = Long.parseLong(carId);
             Car car = carService.findById(id);
-            if(car==null||car.getCarId()==null){
+            if (car == null || car.getCarId() == null) {
                 model.addAttribute("error", "Sản phẩm không tồn tại.");
                 return "/customer/cars";
             }
@@ -266,7 +294,7 @@ public class CustomerController {
             model.addAttribute("listReview", listReview);
             model.addAttribute("car", car);
             return "/customer/car-detail";
-        }catch(Exception e){
+        } catch (Exception e) {
             model.addAttribute("error", "Sản phẩm không tồn tại.");
             return "/customer/cars";
         }
@@ -274,97 +302,100 @@ public class CustomerController {
 
     @PostMapping("rent")
     public String rentCar(Model model, HttpServletRequest request, HttpSession session, RedirectAttributes redirectAttributes) {
-        Long customerId = ((Account)session.getAttribute("account")).getAccountId();
-        String sCarId= request.getParameter("carId");
-        try{
+        Long customerId = ((Account) session.getAttribute("account")).getAccountId();
+        String sCarId = request.getParameter("carId");
+        try {
             Long carId = Long.parseLong(sCarId);
-            Customer customer= customerService.findByCustomerId(customerId);
-            Car car= carService.findById(carId);
-            String sRentDate= request.getParameter("startDate");
-            String sReturnDate= request.getParameter("endDate");
-            if(sRentDate==null||sRentDate.trim().isEmpty()||sReturnDate==null||sReturnDate.trim().isEmpty()){
+            Customer customer = customerService.findByCustomerId(customerId);
+            Car car = carService.findById(carId);
+            String sRentDate = request.getParameter("startDate");
+            String sReturnDate = request.getParameter("endDate");
+            if (sRentDate == null || sRentDate.trim().isEmpty() || sReturnDate == null || sReturnDate.trim().isEmpty()) {
                 redirectAttributes.addFlashAttribute("error", "Vui lòng nhập ngày hợp lệ.");
-                return "redirect:/customer/car-detail?carId="+carId;
+                return "redirect:/customer/car-detail?carId=" + carId;
             }
             LocalDate rentDate = LocalDate.parse(sRentDate);
             LocalDate returnDate = LocalDate.parse(sReturnDate);
-            long dayCount =ChronoUnit.DAYS.between(rentDate, returnDate)+1;
-            Integer days = Integer.parseInt(dayCount+"");
-            Double rentAmount= days*car.getRentPrice();
+            long dayCount = ChronoUnit.DAYS.between(rentDate, returnDate) + 1;
+            Integer days = Integer.parseInt(dayCount + "");
+            Double rentAmount = days * car.getRentPrice();
             CarRental carRental = new CarRental(customer, car, rentDate, returnDate, rentAmount, days, "pending", LocalDate.now(), LocalDate.now());
-            Double balance = customer.getBalance()-rentAmount;
-            if(balance<0){
-                redirectAttributes.addFlashAttribute("error","Bạn không đủ tiền để thanh toán.");
-                return "redirect:/customer/car-detail?carId="+carId;
+            Double balance = customer.getBalance() - rentAmount;
+            if (balance < 0) {
+                redirectAttributes.addFlashAttribute("error", "Bạn không đủ tiền để thanh toán.");
+                return "redirect:/customer/car-detail?carId=" + carId;
             }
-            if(customer.getIdentityCard()==null||customer.getLicenceNumber()==null||customer.getLicenceDate()==null||customer.getIdentityCard().trim().isEmpty()||customer.getLicenceNumber().trim().isEmpty()){
-                redirectAttributes.addFlashAttribute("error","Bạn chưa cập nhật thông tin liên quan đến CCCD và GPLX nên không thuê xe được");
-                return "redirect:/customer/car-detail?carId="+carId;
+            if (customer.getIdentityCard() == null || customer.getLicenceNumber() == null || customer.getLicenceDate() == null || customer.getIdentityCard().trim().isEmpty() || customer.getLicenceNumber().trim().isEmpty()) {
+                redirectAttributes.addFlashAttribute("error", "Bạn chưa cập nhật thông tin liên quan đến CCCD và GPLX nên không thuê xe được");
+                return "redirect:/customer/car-detail?carId=" + carId;
             }
             carRentalService.save(carRental);
             customer.setBalance(balance);
             customerService.save(customer);
             return "redirect:/customer/rental-history";
-        }catch(Exception e){
-            redirectAttributes.addFlashAttribute("error","Có lỗi xảy ra trong qus trình xử lý. Vui long đăng nhập lại.");
-            return "redirect:/auth/logout";
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", "Có lỗi xảy ra trong qus trình xử lý. Vui long đăng nhập lại.");
+            session.invalidate();
+                return "redirect:/auth/login";
         }
     }
+
     @PostMapping("/rental-history/cancel")
     public String cancelRental(Model model, HttpServletRequest request, HttpSession session, RedirectAttributes redirectAttributes) {
         String sCarRentalId = request.getParameter("rentalId");
-        if(sCarRentalId==null||sCarRentalId.trim().isEmpty()){
-            model.addAttribute("error","Đơn hàng không tồn tại.");
+        if (sCarRentalId == null || sCarRentalId.trim().isEmpty()) {
+            model.addAttribute("error", "Đơn hàng không tồn tại.");
             return "/customer/rental-history";
         }
-        try{
+        try {
             Long rentalId = Long.parseLong(sCarRentalId);
             CarRental carRental = carRentalService.findById(rentalId);
-            if(carRental==null){
-                model.addAttribute("error","Đơn hàng không tồn tại.");
+            if (carRental == null) {
+                model.addAttribute("error", "Đơn hàng không tồn tại.");
                 return "/customer/rental-history";
             }
             LocalDate today = LocalDate.now();
-            LocalDate  updateDate = carRental.getUpdateAt();
+            LocalDate updateDate = carRental.getUpdateAt();
             Customer customer = carRental.getCustomer();
 
-            if("pending".equals(carRental.getStatus())){
+            if ("pending".equals(carRental.getStatus())) {
                 //Neu pending thi cho huy thoai mai
-                customer.setBalance(customer.getBalance()+carRental.getRentPrice());
+                customer.setBalance(customer.getBalance() + carRental.getRentPrice());
                 customerService.save(customer);
                 //huy
                 carRental.setStatus("cancelled");
                 carRentalService.save(carRental);
-                redirectAttributes.addFlashAttribute("success","Bạn đã hủy thành công  đơn đang ở trạng thái 'Pending' nên được hoàn 100% tiền vào ví.");
+                redirectAttributes.addFlashAttribute("success", "Bạn đã hủy thành công  đơn đang ở trạng thái 'Pending' nên được hoàn 100% tiền vào ví.");
                 return "redirect:/customer/rental-history";
-            }else if("confirmed".equals(carRental.getStatus())){
+            } else if ("confirmed".equals(carRental.getStatus())) {
                 //Neu da duoc chu xe confirm roi thi phai check
-                if(today.isAfter(updateDate)){
+                if (today.isAfter(updateDate)) {
                     //Neu sau do moi huy thi nhan lai 60%
-                    customer.setBalance(customer.getBalance()+carRental.getRentPrice()*0.6);
+                    customer.setBalance(customer.getBalance() + carRental.getRentPrice() * 0.6);
                     customerService.save(customer);
                     //huy
                     carRental.setStatus("cancelled");
                     carRentalService.save(carRental);
-                    redirectAttributes.addFlashAttribute("success","Bạn đã hủy thành công  đơn đang ở trạng thái 'Confirmed' nhưng không cùng ngày 'Confirmed' nên chỉ được hoàn 60% tổng số tiền.");
+                    redirectAttributes.addFlashAttribute("success", "Bạn đã hủy thành công  đơn đang ở trạng thái 'Confirmed' nhưng không cùng ngày 'Confirmed' nên chỉ được hoàn 60% tổng số tiền.");
                     return "redirect:/customer/rental-history";
-                }else{
+                } else {
                     //Neu huy trong ngay confirm duoc hoan tien 100%
-                    customer.setBalance(customer.getBalance()+carRental.getRentPrice());
+                    customer.setBalance(customer.getBalance() + carRental.getRentPrice());
                     customerService.save(customer);
                     carRental.setStatus("cancelled");
                     carRentalService.save(carRental);
-                    redirectAttributes.addFlashAttribute("success","Bạn đã hủy thành công  đơn cùng ngày chủ xe 'Confirmed' nên được hoàn 100% tiền vào ví.");
+                    redirectAttributes.addFlashAttribute("success", "Bạn đã hủy thành công  đơn cùng ngày chủ xe 'Confirmed' nên được hoàn 100% tiền vào ví.");
                     return "redirect:/customer/rental-history";
                 }
-            }else{
+            } else {
                 //Đang trong shipping, shipped, completed, cancelled
-                redirectAttributes.addFlashAttribute("error","Bạn không thể hủy đơn này.");
+                redirectAttributes.addFlashAttribute("error", "Bạn không thể hủy đơn này.");
                 return "redirect:/customer/rental-history";
             }
-        }catch(Exception e){
+        } catch (Exception e) {
             redirectAttributes.addFlashAttribute("error", "Có lỗi trong quá trình xử lý vui lòng đăng nhập lại.");
-            return "redirect:/auth/logout";
+            session.invalidate();
+                return "redirect:/auth/login";
         }
     }
 }
