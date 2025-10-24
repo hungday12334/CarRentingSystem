@@ -232,7 +232,7 @@
         <tbody>
         <tr th:each="car : ${cars}">
             <td class="action-icons">
-                <a th:href="@{/admin/cars/update(id=${car.carId})}">
+                <a th:href="@{/admin/cars/update(carId=${car.carId})}">
                     <i class="bi bi-car-front" style="font-size: 1.8rem;" alt="Sửa thông tin"></i>
                 </a>
                 <form th:action="@{/admin/cars/deactive}" method="post" style="display:inline;">

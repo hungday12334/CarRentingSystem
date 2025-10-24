@@ -212,4 +212,157 @@ public class AdminCarManagement {
         return "redirect:/admin/cars";
     }
 
+    @GetMapping("/update")
+    public String updateCarG(HttpServletRequest request, Model model, RedirectAttributes redirectAttributes) {
+        String carId = request.getParameter("carId");
+        List<CarProducer> producers = carProducerService.findAll();
+        model.addAttribute("producers", producers);
+        try{
+            Long id = Long.parseLong(carId);
+            Car car = carService.findById(id);
+            if(car == null){
+                redirectAttributes.addFlashAttribute("error","Xe ô tô không tồn tại");
+                return "redirect:/admin/cars";
+            }
+            model.addAttribute("car", car);
+            return "admin/car-update";
+        }catch (Exception e){
+            redirectAttributes.addFlashAttribute("error","Xe ô tô không tồn tại");
+            return "redirect:/admin/cars";
+        }
+    }
+
+    @PostMapping("update")
+    public String updateCarP(HttpServletRequest request, Model model, RedirectAttributes redirectAttributes) {
+        List<CarProducer> producers = carProducerService.findAll();
+        model.addAttribute("producers", producers);
+
+        // Lấy carId
+        String carIdStr = request.getParameter("carId");
+        Car car;
+        try {
+            Long carId = Long.parseLong(carIdStr);
+            car = carService.findById(carId);
+            if (car == null) {
+                redirectAttributes.addFlashAttribute("error", "Xe ô tô không tồn tại");
+                return "redirect:/admin/cars";
+            }
+            model.addAttribute("car", car);
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", "Xe ô tô không tồn tại");
+            return "redirect:/admin/cars";
+        }
+
+        // Helper để check null/empty và trim
+        String carName = getParam(request, "carName", "Tên xe", model);
+        String imageUrl = getParam(request, "imageUrl", "Link ảnh", model);
+        String carModelYearStr = getParam(request, "carModelYear", "Năm sản xuất", model);
+        String color = getParam(request, "color", "Màu sắc", model);
+        String capacityStr = getParam(request, "capacity", "Sức chứa", model);
+        String description = getParam(request, "description", "Mô tả", model);
+        String importDateStr = getParam(request, "importDate", "Ngày nhập", model);
+        String producerIdStr = getParam(request, "producerId", "Nhà sản xuất", model);
+        String rentPriceStr = getParam(request, "rentPrice", "Giá", model);
+        String status = getParam(request, "status", "Trạng thái", model);
+        String address = getParam(request, "address", "Địa chỉ", model);
+
+        // Nếu có lỗi checkParam thì trả về view
+        if (anyNull(carName, imageUrl, carModelYearStr, color, capacityStr, description,
+                importDateStr, producerIdStr, rentPriceStr, status, address)) {
+            return "admin/car-update";
+        }
+
+        // Parse số và ngày
+        int carModelYear = parsePositiveInt(carModelYearStr, "Năm sản xuất", model);
+        if (carModelYear == -1) return "admin/car-update";
+
+        int capacity = parsePositiveInt(capacityStr, "Sức chứa", model);
+        if (capacity == -1) return "admin/car-update";
+
+        double rentPrice = parsePositiveDouble(rentPriceStr, "Giá", model);
+        if (rentPrice == -1) return "admin/car-update";
+
+        LocalDate importDate;
+        try {
+            importDate = LocalDate.parse(importDateStr);
+        } catch (Exception e) {
+            model.addAttribute("error", "Ngày nhập không hợp lệ. Định dạng yyyy-MM-dd.");
+            return "admin/car-update";
+        }
+
+        Long producerId;
+        try {
+            producerId = Long.parseLong(producerIdStr);
+        } catch (NumberFormatException e) {
+            model.addAttribute("error", "Nhà sản xuất không hợp lệ.");
+            return "admin/car-update";
+        }
+
+        CarProducer producer = carProducerService.findByProducerId(producerId);
+        if (producer == null) {
+            model.addAttribute("error", "Nhà sản xuất không tồn tại.");
+            return "admin/car-update";
+        }
+
+        // Cập nhật thông tin Car
+        car.setCarName(carName);
+        car.setImageUrl(imageUrl);
+        car.setCarModelYear(carModelYear);
+        car.setColor(color);
+        car.setCapacity(capacity);
+        car.setDescription(description);
+        car.setImportDate(importDate);
+        car.setProducer(producer);
+        car.setRentPrice(rentPrice);
+        car.setStatus(status);
+        car.setAddress(address);
+        // giữ nguyên hiden và rented
+        carService.save(car);
+
+        model.addAttribute("success", "Cập nhật xe thành công!");
+        return "/admin/car-update";
+    }
+
+    private String getParam(HttpServletRequest req, String name, String fieldName, Model model) {
+        String value = req.getParameter(name);
+        if (value == null || value.trim().isEmpty()) {
+            model.addAttribute("error", fieldName + " không được để trống.");
+            return null;
+        }
+        return value.trim();
+    }
+
+    private boolean anyNull(String... values) {
+        for (String v : values) if (v == null) return true;
+        return false;
+    }
+
+    private int parsePositiveInt(String value, String fieldName, Model model) {
+        try {
+            int n = Integer.parseInt(value);
+            if (n <= 0) {
+                model.addAttribute("error", fieldName + " phải là số dương.");
+                return -1;
+            }
+            return n;
+        } catch (NumberFormatException e) {
+            model.addAttribute("error", fieldName + " phải là số hợp lệ.");
+            return -1;
+        }
+    }
+
+    private double parsePositiveDouble(String value, String fieldName, Model model) {
+        try {
+            double n = Double.parseDouble(value);
+            if (n <= 0) {
+                model.addAttribute("error", fieldName + " phải là số dương.");
+                return -1;
+            }
+            return n;
+        } catch (NumberFormatException e) {
+            model.addAttribute("error", fieldName + " phải là số hợp lệ.");
+            return -1;
+        }
+    }
+
 }

@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cập nhật thông tin xe</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Roboto', sans-serif;
+        }
+
+        body {
+            display: flex;
+            min-height: 100vh;
+            background-color: #f0f2f5;
+        }
+
+        /* Thanh điều hướng bên trái */
+        .sidebar {
+            width: 20%;
+            background-color: #1a2634;
+            color: white;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .sidebar a {
+            color: white;
+            text-decoration: none;
+            font-size: 16px;
+            padding: 12px 15px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .sidebar a:hover {
+            background-color: #3498db;
+            transform: translateX(5px);
+        }
+
+        .sidebar .logo {
+            font-size: 28px;
+            font-weight: 700;
+            text-align: center;
+            margin-bottom: 30px;
+            color: #3498db;
+        }
+
+        /* Khu vực chính bên phải */
+        .main-content {
+            width: 80%;
+            padding: 30px;
+        }
+
+        .form-container {
+            background-color: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .form-container h2 {
+            font-size: 24px;
+            font-weight: 500;
+            color: #2c3e50;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .car-image-preview {
+            display: block;
+            max-width: 200px;
+            max-height: 120px;
+            object-fit: cover;
+            border-radius: 6px;
+            margin: 0 auto 20px;
+            border: 1px solid #ccc;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 14px;
+            font-weight: 500;
+            color: #2c3e50;
+            margin-bottom: 8px;
+        }
+
+        .form-group label span.required {
+            color: #e74c3c;
+        }
+
+        .form-group input, .form-group select, .form-group textarea {
+            width: 100%;
+            padding: 10px;
+            font-size: 14px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input[readonly], .form-group select[disabled], .form-group textarea[readonly] {
+            background-color: #f8f8f8;
+            cursor: not-allowed;
+        }
+
+        .form-group input:focus:not([readonly]), .form-group select:focus:not([disabled]), .form-group textarea:focus:not([readonly]) {
+            outline: none;
+            border-color: #3498db;
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+        }
+
+        .form-actions button, .form-actions a {
+            padding: 10px 20px;
+            font-size: 14px;
+            font-weight: 500;
+            border: 2px solid #3498db;
+            background-color: white;
+            color: #3498db;
+            border-radius: 6px;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .form-actions button:hover, .form-actions a:hover {
+            background-color: #3498db;
+            color: white;
+        }
+
+        .form-actions .cancel-btn {
+            border-color: #e74c3c;
+            color: #e74c3c;
+        }
+
+        .form-actions .cancel-btn:hover {
+            background-color: #e74c3c;
+            color: white;
+        }
+
+        .error, .success {
+            text-align: center;
+            margin-bottom: 10px;
+        }
+
+        .error {
+            color: #d93025; /* đỏ đậm */
+            border: 2px solid #d93025;
+            background-color: #fff; /* nền trắng */
+            padding: 10px 14px;
+            border-radius: 6px;
+            font-weight: 600;
+            margin-top: 10px;
+        }
+
+        .success {
+            color: #137333; /* xanh đậm */
+            border: 2px solid #137333;
+            background-color: #fff; /* nền trắng */
+            padding: 10px 14px;
+            border-radius: 6px;
+            font-weight: 600;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+<!-- Thanh điều hướng bên trái -->
+<div class="sidebar">
+    <a href="/admin/customers" class="logo">CRS</a>
+    <a href="/admin/customers">Quản lý khách hàng</a>
+    <a href="/admin/accounts">Quản lý tài khoản</a>
+    <a href="/admin/cars">Quản lý xe</a>
+    <a href="/admin/rentals">Quản lý thuê xe</a>
+    <a href="/admin/reports">Báo cáo thống kê</a>
+    <a href="/auth/logout">Đăng xuất</a>
+</div>
+
+<!-- Khu vực chính bên phải -->
+<div class="main-content">
+    <div class="form-container">
+        <h2>Cập nhật thông tin xe</h2>
+        <img th:if="${car.imageUrl}" th:src="${car.imageUrl}" class="car-image-preview" alt="Ảnh xe">
+        <div th:if="${error}" class="error" th:text="${error}"></div>
+        <div th:if="${success}" class="success" th:text="${success}"></div>
+        <form th:action="@{/admin/cars/update(id=${car.carId})}" method="post" id="carForm">
+            <input type="hidden" th:value="${car.carId}" name="carId">
+            <div class="form-group">
+                <label for="carName">Tên xe <span class="required">*</span></label>
+                <input type="text" id="carName" name="carName" th:value="${car.carName}" required readonly>
+            </div>
+            <div class="form-group">
+                <label for="imageUrl">URL ảnh</label>
+                <input type="text" id="imageUrl" name="imageUrl" th:value="${car.imageUrl} ?: ''" readonly>
+            </div>
+            <div class="form-group">
+                <label for="carModelYear">Năm sản xuất <span class="required">*</span></label>
+                <input type="number" id="carModelYear" name="carModelYear" th:value="${car.carModelYear}" required readonly>
+            </div>
+            <div class="form-group">
+                <label for="color">Màu sắc <span class="required">*</span></label>
+                <input type="text" id="color" name="color" th:value="${car.color}" required readonly>
+            </div>
+            <div class="form-group">
+                <label for="capacity">Sức chứa <span class="required">*</span></label>
+                <input type="number" id="capacity" name="capacity" th:value="${car.capacity}" required readonly>
+            </div>
+            <div class="form-group">
+                <label for="description">Mô tả <span class="required">*</span></label>
+                <textarea id="description" name="description" th:text="${car.description}" required readonly></textarea>
+            </div>
+            <div class="form-group">
+                <label for="importDate">Ngày nhập <span class="required">*</span></label>
+                <input type="date" id="importDate" name="importDate" th:value="${car.importDate}" required readonly>
+            </div>
+            <div class="form-group">
+                <label for="producerId">Nhà sản xuất <span class="required">*</span></label>
+                <select id="producerId" name="producerId" required disabled>
+                    <option th:each="producer : ${producers}" th:value="${producer.producerId}" th:text="${producer.producerName}" th:selected="${producer.producerId == car.producer.producerId}"></option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="rentPrice">Giá thuê <span class="required">*</span></label>
+                <input type="number" id="rentPrice" name="rentPrice" step="0.01" th:value="${car.rentPrice}" required readonly>
+            </div>
+            <div class="form-group">
+                <label for="status">Trạng thái <span class="required">*</span></label>
+                <select id="status" name="status" required disabled>
+                    <option value="Available" th:selected="${car.status == 'Available'}">Sẵn hàng</option>
+                    <option value="Rented" th:selected="${car.status == 'Rented'}">Đang được thuê</option>
+                    <option value="Maintenance" th:selected="${car.status == 'Maintenance'}">Bảo trì</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="address">Địa chỉ</label>
+                <input type="text" id="address" name="address" th:value="${car.address} ?: ''" readonly>
+            </div>
+            <div class="form-actions">
+                <button type="button" id="updateBtn">Cập nhật</button>
+            </div>
+            <div class="form-actions" id="saveCancelBtns" style="display: none;">
+                <button type="submit">Lưu</button>
+                <button type="button" class="cancel-btn" id="cancelBtn">Hủy</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    const updateBtn = document.getElementById('updateBtn');
+    const saveCancelBtns = document.getElementById('saveCancelBtns');
+    const cancelBtn = document.getElementById('cancelBtn');
+    const inputs = document.querySelectorAll('#carForm input:not([type="hidden"])');
+    const selects = document.querySelectorAll('#carForm select');
+    const textareas = document.querySelectorAll('#carForm textarea');
+
+    updateBtn.addEventListener('click', () => {
+        inputs.forEach(input => input.removeAttribute('readonly'));
+        selects.forEach(select => select.removeAttribute('disabled'));
+        textareas.forEach(textarea => textarea.removeAttribute('readonly'));
+        updateBtn.style.display = 'none';
+        saveCancelBtns.style.display = 'flex';
+    });
+
+    cancelBtn.addEventListener('click', () => {
+        inputs.forEach(input => input.setAttribute('readonly', ''));
+        selects.forEach(select => select.setAttribute('disabled', ''));
+        textareas.forEach(textarea => textarea.setAttribute('readonly', ''));
+        updateBtn.style.display = 'block';
+        saveCancelBtns.style.display = 'none';
+    });
+</script>
+</body>
+</html>
