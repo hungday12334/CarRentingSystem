@@ -1,6 +1,7 @@
 package hsf302.he191662.hungnt.carrentingsystem.repository;
 
 import hsf302.he191662.hungnt.carrentingsystem.entity.Car;
+import hsf302.he191662.hungnt.carrentingsystem.entity.Customer;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -35,5 +36,8 @@ public interface CarRepository extends JpaRepository<Car,Long> {
     );
 
     public Car findByCarId(Long carId);
+
+    @Query("select c from Car c where (:carName is null or lower(c.carName) like concat('%', :carName,'%')) and(:carId is null or c.carId = :carId)")
+    public List<Car> findByCarNameAndCarId(@Param("carId") Long carId, @Param("carName") String carName);
 
 }

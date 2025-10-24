@@ -1,10 +1,249 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản lý xe</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css">    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Roboto', sans-serif;
+        }
+
+        body {
+            display: flex;
+            min-height: 100vh;
+            background-color: #f0f2f5;
+        }
+
+        /* Thanh điều hướng bên trái */
+        .sidebar {
+            width: 20%;
+            background-color: #1a2634;
+            color: white;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .sidebar a {
+            color: white;
+            text-decoration: none;
+            font-size: 16px;
+            padding: 12px 15px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .sidebar a:hover {
+            background-color: #3498db;
+            transform: translateX(5px);
+        }
+
+        .sidebar .logo {
+            font-size: 28px;
+            font-weight: 700;
+            text-align: center;
+            margin-bottom: 30px;
+            color: #3498db;
+        }
+
+        /* Khu vực chính bên phải */
+        .main-content {
+            width: 80%;
+            padding: 30px;
+        }
+
+        .filter-section {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 25px;
+            align-items: center;
+            background-color: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+        }
+
+        .filter-section input {
+            padding: 10px;
+            font-size: 14px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            flex: 1;
+            transition: border-color 0.3s;
+        }
+
+        .filter-section input:focus {
+            outline: none;
+            border-color: #3498db;
+        }
+
+        .filter-section button, .create-button {
+            padding: 10px 20px;
+            font-size: 14px;
+            font-weight: 500;
+            border: 2px solid #3498db;
+            background-color: white;
+            color: #3498db;
+            border-radius: 6px;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .filter-section button:hover, .create-button:hover {
+            background-color: #3498db;
+            color: white;
+        }
+
+        /* Bảng dữ liệu */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background-color: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        th, td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        th {
+            background-color: #3498db;
+            color: white;
+            font-weight: 500;
+            font-size: 14px;
+        }
+
+        td {
+            font-size: 14px;
+            color: #2c3e50;
+        }
+
+        tr:hover {
+            background-color: #f8fafc;
+        }
+
+        .action-icons a, .action-icons form {
+            display: inline-block;
+            margin-right: 10px;
+        }
+
+        .action-icons img {
+            width: 20px;
+            height: 20px;
+            vertical-align: middle;
+        }
+
+        .action-icons button {
+            background: none;
+            border: none;
+            cursor: pointer;
+        }
+
+        .car-image {
+            width: 100px;
+            height: 60px;
+            object-fit: cover;
+            border-radius: 4px;
+        }
+    </style>
 </head>
 <body>
-car management
+<!-- Thanh điều hướng bên trái -->
+<div class="sidebar">
+    <a href="/admin/customers" class="logo">CRS</a>
+    <a href="/admin/customers">Quản lý khách hàng</a>
+    <a href="/admin/accounts">Quản lý tài khoản</a>
+    <a href="/admin/cars">Quản lý xe</a>
+    <a href="/admin/rentals">Quản lý thuê xe</a>
+    <a href="/admin/reports">Báo cáo thống kê</a>
+    <a href="/auth/logout">Đăng xuất</a>
+</div>
+
+<!-- Khu vực chính bên phải -->
+<div class="main-content">
+    <!-- Phần lọc -->
+    <div class="filter-section">
+        <form method="get" action="/admin/cars" class="filter-form">
+            <input type="text" placeholder="ID xe" th:value="${carIdFilter}" name="carIdFilter">
+            <input type="text" placeholder="Tên xe" th:value="${carNameFilter}" name="carNameFilter">
+            <button type="submit">Lọc</button>
+        </form>
+        <a href="/admin/cars/create" class="create-button">Tạo xe mới</a>
+    </div>
+
+    <!-- Bảng dữ liệu xe -->
+    <table>
+        <thead>
+        <tr>
+            <th></th>
+            <th>ID Xe</th>
+            <th>Tên xe</th>
+            <th>Ảnh</th>
+            <th>Năm sản xuất</th>
+            <th>Màu sắc</th>
+            <th>Sức chứa</th>
+            <th>Đã thuê</th>
+            <th>Mô tả</th>
+            <th>Ngày nhập</th>
+            <th>Nhà sản xuất</th>
+            <th>Giá thuê</th>
+            <th>Trạng thái</th>
+            <th>Ẩn</th>
+            <th>Địa chỉ</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="car : ${cars}">
+            <td class="action-icons">
+                <a th:href="@{/admin/cars/update(id=${car.carId})}">
+                    <i class="bi bi-car-front" style="font-size: 1.8rem;" alt="Sửa thông tin"></i>
+                </a>
+                <form th:action="@{/admin/cars/deactive}" method="post" style="display:inline;">
+                    <input type="hidden" th:value="${car.carId}" name="carId">
+                    <button type="submit">
+                        <i class="bi bi-x-circle" style="font-size: 1.8rem; color:red;" alt="Vô hiệu hóa"></i>
+                    </button>
+                </form>
+            </td>
+            <td th:text="${car.carId}"></td>
+            <td th:text="${car.carName}"></td>
+            <td>
+                <img th:src="${car.imageUrl}" class="car-image" alt="Ảnh xe" th:unless="${car.imageUrl == null}">
+            </td>
+            <td th:text="${car.carModelYear}"></td>
+            <td th:text="${car.color}"></td>
+            <td th:text="${car.capacity}"></td>
+            <td th:text="${car.rented}"></td>
+            <td th:text="${car.description}"></td>
+            <td th:text="${car.importDate}"></td>
+            <td th:text="${car.producer.producerName}"></td>
+            <td th:text="${car.rentPrice}"></td>
+            <td th:text="${car.status}"></td>
+            <td th:text="${car.isHiden} ? 'Có' : 'Không'"></td>
+            <td th:text="${car.address} ?: ''"></td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+
+<script>
+    function filterCars() {
+        const carId = document.querySelector('input[name="carIdFilter"]').value;
+        const carName = document.querySelector('input[name="carNameFilter"]').value;
+        window.location.href = `/admin/cars?carId=${carId}&carName=${carName}`;
+    }
+</script>
 </body>
 </html>

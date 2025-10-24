@@ -17,6 +17,6 @@ public interface CustomerRepository extends JpaRepository<Customer,Long> {
 
     @Query("select c from Customer c where c.licenceNumber = :licenceNumber")
     public Customer findByLicenceNumber(@Param("licenceNumber") String licenceNumber);
-    @Query("select c from Customer c where (:customerId is null or lower(c.customerName) like concat('%', :customerId,'%')) and(:customerName is null or c.customerName = :customerName)")
+    @Query("select c from Customer c where (:customerName is null or lower(c.customerName) like concat('%', :customerName,'%')) and(:customerId is null or c.customerId = :customerId)")
     public List<Customer> findByCustomerIdAndCustomerName(@Param("customerId") Long customerId,@Param("customerName") String customerName);
 }

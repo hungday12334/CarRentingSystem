@@ -1,6 +1,7 @@
 package hsf302.he191662.hungnt.carrentingsystem.service;
 
 import hsf302.he191662.hungnt.carrentingsystem.entity.Car;
+import hsf302.he191662.hungnt.carrentingsystem.entity.Customer;
 import hsf302.he191662.hungnt.carrentingsystem.repository.CarRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -94,5 +95,16 @@ public class CarServiceImpl implements CarService {
     @Override
     public Car findById(Long id) {
         return carRepository.findById(id).orElse(null);
+    }
+
+    @Override
+    public List<Car> findByCarNameAndCarId(String carId, String carName) {
+        Long id;
+        try{
+            id= Long.parseLong(carId);
+        }catch(Exception e) {
+            id= null;
+        }
+        return carRepository.findByCarNameAndCarId(id, carName);
     }
 }

@@ -204,6 +204,14 @@ public class Car implements Serializable {
         this.address = address;
     }
 
+    public boolean isHiden() {
+        return isHiden;
+    }
+
+    public void setHiden(boolean hiden) {
+        isHiden = hiden;
+    }
+
     public List<Review> getReviews() {
         return reviews;
     }
