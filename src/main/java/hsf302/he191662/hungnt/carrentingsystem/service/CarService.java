@@ -10,8 +10,9 @@ public interface CarService {
     public List<Car> findTop5ByOrderByRentedDesc();
     public List<Car> findAll();
     public List<String> findDistinctByColor();
-    public List<Car> filter(String name, String color, String status, String producerId, String year, String priceFrom, String priceTo);
+    public List<Car> filter(String name, String color, String status, String producerId, String year, String priceFrom, String priceTo,boolean isHidden);
     public Car findById(Long id);
     public List<Car> findByCarNameAndCarId(String carId,String carName);
     public void save(Car car);
+    public void deleteById(Long id);
 }

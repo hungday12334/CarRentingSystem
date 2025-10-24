@@ -16,15 +16,16 @@ public interface CarRepository extends JpaRepository<Car,Long> {
 
     //filter
     @Query("""
-        SELECT c FROM Car c
-        WHERE (:name IS NULL OR LOWER(c.carName) LIKE LOWER(CONCAT('%', :name, '%')))
-          AND (:color IS NULL OR LOWER(c.color) = LOWER(:color))
-          AND (:status IS NULL OR LOWER(c.status) = LOWER(:status))
-          AND (:producerId IS NULL OR c.producer.producerId = :producerId)
-          AND (:year IS NULL OR c.carModelYear = :year)
-          AND (:priceFrom IS NULL OR c.rentPrice >= :priceFrom)
-          AND (:priceTo IS NULL OR c.rentPrice <= :priceTo)
-    """)
+    SELECT c FROM Car c
+    WHERE c.isHiden = :isHidden
+      AND (:name IS NULL OR LOWER(c.carName) LIKE LOWER(CONCAT('%', :name, '%')))
+      AND (:color IS NULL OR LOWER(c.color) = LOWER(:color))
+      AND (:status IS NULL OR LOWER(c.status) = LOWER(:status))
+      AND (:producerId IS NULL OR c.producer.producerId = :producerId)
+      AND (:year IS NULL OR c.carModelYear = :year)
+      AND (:priceFrom IS NULL OR c.rentPrice >= :priceFrom)
+      AND (:priceTo IS NULL OR c.rentPrice <= :priceTo)
+""")
     List<Car> filter(
             @Param("name") String name,
             @Param("color") String color,
@@ -32,8 +33,10 @@ public interface CarRepository extends JpaRepository<Car,Long> {
             @Param("producerId") Long producerId,
             @Param("year") Integer year,
             @Param("priceFrom") Double priceFrom,
-            @Param("priceTo") Double priceTo
+            @Param("priceTo") Double priceTo,
+            @Param("isHidden") boolean isHidden
     );
+
 
     public Car findByCarId(Long carId);
 

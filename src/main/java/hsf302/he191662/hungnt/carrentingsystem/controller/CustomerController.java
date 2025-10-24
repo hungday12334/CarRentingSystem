@@ -58,7 +58,7 @@ public class CustomerController {
         model.addAttribute("year", year);
         model.addAttribute("priceFrom", priceFrom);
         model.addAttribute("priceTo", priceTo);
-        model.addAttribute("listCar", carService.filter(carName, color, status, producerId, year, priceFrom, priceTo));
+        model.addAttribute("listCar", carService.filter(carName, color, status, producerId, year, priceFrom, priceTo,false));
 
         model.addAttribute("listColor", carService.findDistinctByColor());
         model.addAttribute("listProducer", carProducerService.findAll());

@@ -2,6 +2,7 @@ package hsf302.he191662.hungnt.carrentingsystem.controller;
 
 import hsf302.he191662.hungnt.carrentingsystem.entity.Car;
 import hsf302.he191662.hungnt.carrentingsystem.entity.CarProducer;
+import hsf302.he191662.hungnt.carrentingsystem.entity.CarRental;
 import hsf302.he191662.hungnt.carrentingsystem.service.CarProducerService;
 import hsf302.he191662.hungnt.carrentingsystem.service.CarProducerServiceImpl;
 import hsf302.he191662.hungnt.carrentingsystem.service.CarService;
@@ -321,6 +322,50 @@ public class AdminCarManagement {
 
         model.addAttribute("success", "Cập nhật xe thành công!");
         return "/admin/car-update";
+    }
+
+    @PostMapping("deactive")
+    public String deactiveCar(HttpServletRequest request, Model model, RedirectAttributes redirectAttributes) {
+        // Lấy carId
+        String carIdStr = request.getParameter("carId");
+        Car car;
+        try {
+            Long carId = Long.parseLong(carIdStr);
+            car = carService.findById(carId);
+            if (car == null) {
+                redirectAttributes.addFlashAttribute("error", "Xe ô tô không tồn tại");
+                return "redirect:/admin/cars";
+            }
+            model.addAttribute("car", car);
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", "Xe ô tô không tồn tại");
+            return "redirect:/admin/cars";
+        }
+        List<CarRental> listRentals = car.getRentals();
+        if(listRentals==null||listRentals.size()==0){
+            carService.deleteById(car.getCarId());
+            redirectAttributes.addFlashAttribute("success","Xóa thành công sản phẩm, do sản phẩm này đang không còn đơn.");
+            return "redirect:/admin/cars";
+        }else{
+            boolean check = false;
+            for(CarRental rental:listRentals){
+                if(!("cancelled".equalsIgnoreCase(rental.getStatus()) || "completed".equalsIgnoreCase(rental.getStatus()))){
+                    check = true;
+                    break;
+                }
+            }
+            if(check){
+                car.setHiden(true);
+                carService.save(car);
+                redirectAttributes.addFlashAttribute("success","Ẩn thành công sản phẩm, do sản phẩm này đang còn đơn nên không thể xóa được. ");
+                return "redirect:/admin/cars";
+            }else{
+                car.setHiden(true);
+                carService.save(car);
+                redirectAttributes.addFlashAttribute("success","Ẩn thành công sản phẩm, do sản phẩm này đang còn đơn nên không thể xóa được. ");
+                return "redirect:/admin/cars";
+            }
+        }
     }
 
     private String getParam(HttpServletRequest req, String name, String fieldName, Model model) {

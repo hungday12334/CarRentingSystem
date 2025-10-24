@@ -31,7 +31,7 @@ public class CarServiceImpl implements CarService {
     @Override
     public List<Car> filter(String name, String color, String status,
                             String producerId, String year,
-                            String priceFrom, String priceTo) {
+                            String priceFrom, String priceTo,boolean isHidden) {
 
         // Chuyển producerId sang Long
         Long producerIdLong = null;
@@ -86,7 +86,8 @@ public class CarServiceImpl implements CarService {
                 producerIdLong,
                 yearLong,
                 priceFromDouble,
-                priceToDouble
+                priceToDouble,
+                isHidden
         );
 
 
@@ -111,6 +112,11 @@ public class CarServiceImpl implements CarService {
     @Override
     public void save(Car car) {
         carRepository.save(car);
+    }
+
+    @Override
+    public void deleteById(Long id) {
+        carRepository.deleteById(id);
     }
 
 
