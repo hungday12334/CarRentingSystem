@@ -6,4 +6,5 @@ import java.util.List;
 
 public interface CarProducerService {
     public List<CarProducer> findAll();
+    public CarProducer findByProducerId(Long producerId);
 }

@@ -107,4 +107,11 @@ public class CarServiceImpl implements CarService {
         }
         return carRepository.findByCarNameAndCarId(id, carName);
     }
+
+    @Override
+    public void save(Car car) {
+        carRepository.save(car);
+    }
+
+
 }

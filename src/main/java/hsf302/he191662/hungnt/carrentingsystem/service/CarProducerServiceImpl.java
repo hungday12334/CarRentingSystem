@@ -15,4 +15,9 @@ public class CarProducerServiceImpl implements CarProducerService{
     public List<CarProducer> findAll() {
         return carProducerRepository.findAll();
     }
+
+    @Override
+    public CarProducer findByProducerId(Long producerId) {
+        return carProducerRepository.findByProducerId(producerId);
+    }
 }

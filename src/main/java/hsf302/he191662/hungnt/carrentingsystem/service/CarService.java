@@ -13,4 +13,5 @@ public interface CarService {
     public List<Car> filter(String name, String color, String status, String producerId, String year, String priceFrom, String priceTo);
     public Car findById(Long id);
     public List<Car> findByCarNameAndCarId(String carId,String carName);
+    public void save(Car car);
 }

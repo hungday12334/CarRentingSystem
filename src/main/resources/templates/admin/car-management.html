@@ -157,6 +157,29 @@
             object-fit: cover;
             border-radius: 4px;
         }
+        .error, .success {
+            text-align: center;
+            margin-bottom: 10px;
+        }
+        .error {
+            color: #d93025; /* đỏ đậm */
+            border: 2px solid #d93025;
+            background-color: #fff; /* nền trắng */
+            padding: 10px 14px;
+            border-radius: 6px;
+            font-weight: 600;
+            margin-top: 10px;
+        }
+
+        .success {
+            color: #137333; /* xanh đậm */
+            border: 2px solid #137333;
+            background-color: #fff; /* nền trắng */
+            padding: 10px 14px;
+            border-radius: 6px;
+            font-weight: 600;
+            margin-top: 10px;
+        }
     </style>
 </head>
 <body>
@@ -184,6 +207,8 @@
     </div>
 
     <!-- Bảng dữ liệu xe -->
+    <div th:if="${error}" class="error" th:text="${error}"></div>
+    <div th:if="${success}" class="success" th:text="${success}"></div>
     <table>
         <thead>
         <tr>
