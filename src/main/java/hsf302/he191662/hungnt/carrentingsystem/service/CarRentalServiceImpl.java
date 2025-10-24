@@ -12,6 +12,7 @@ import java.util.List;
 public class CarRentalServiceImpl implements CarRentalService{
     @Autowired
     CarRentalRepository carRentalRepository;
+
     @Override
     public void save(CarRental carRental) {
         carRentalRepository.save(carRental);
@@ -71,6 +72,11 @@ public class CarRentalServiceImpl implements CarRentalService{
             rentPriceMaxD = Double.MAX_VALUE;
         }
         return carRentalRepository.filter(status, customerId, rentalDateFromL, rentalDateToL, periodDayI, rentPriceMinD, rentPriceMaxD);
+    }
+
+    @Override
+    public List<CarRental> findAll() {
+        return carRentalRepository.findAll();
     }
 
 }
