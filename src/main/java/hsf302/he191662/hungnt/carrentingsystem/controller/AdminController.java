@@ -34,4 +34,15 @@ public class AdminController {
         return "admin/customer-management";
     }
 
+    @GetMapping("/customers/create")
+    public String createCustomer() {
+        return "admin/customer-create";
+    }
+
+    @GetMapping("/customers/update")
+    public String updateCustomer() {
+        return "admin/customer-update";
+    }
+
+
 }

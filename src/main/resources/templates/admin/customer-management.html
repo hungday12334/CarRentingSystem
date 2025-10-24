@@ -169,9 +169,11 @@
 <div class="main-content">
     <!-- Phần lọc -->
     <div class="filter-section">
-        <input type="number" placeholder="ID khách hàng" th:value="${customerIdFilter}" name="customerIdFilter">
-        <input type="text" placeholder="Tên khách hàng" th:value="${customerNameFilter}" name="customerNameFilter">
-        <button type="button" onclick="filterCustomers()">Lọc</button>
+        <form method="get" action="/admin/customers" class="filter-form">
+            <input type="number" placeholder="ID khách hàng" th:value="${customerIdFilter}" name="customerIdFilter">
+            <input type="text" placeholder="Tên khách hàng" th:value="${customerNameFilter}" name="customerNameFilter">
+            <button type="submit" onclick="filterCustomers()">Lọc</button>
+        </form>
         <a href="/admin/customers/create" class="create-button">Tạo khách hàng mới</a>
     </div>
 
@@ -202,12 +204,13 @@
         <tr th:each="customer : ${customers}">
             <td class="action-icons">
                 <a th:href="@{/admin/customers/update(customerId=${customer.customerId})}">
-                    <i class="bi bi-person-circle" alt="Sửa thông tin"></i>
+                    <i class="bi bi-person-circle" style="font-size: 1.8rem;" alt="Sửa thông tin"></i>
                 </a>
+
                 <form th:action="@{/admin/customers/deactive}" method="post" style="display:inline;">
                     <input type="hidden" th:value="${customer.customerId}" name="customerId">
-                    <button type="submit">
-                        <i class="bi bi-x-circle" alt="Vô hiệu hóa người dùng."></i>
+                    <button type="submit" style="background:none; border:none; padding:0; cursor:pointer;">
+                        <i class="bi bi-x-circle" style="font-size: 1.8rem; color:red;" alt="Vô hiệu hóa người dùng."></i>
                     </button>
                 </form>
             </td>
