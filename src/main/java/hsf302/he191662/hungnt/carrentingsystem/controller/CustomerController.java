@@ -20,6 +20,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import java.time.temporal.ChronoUnit;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.logging.Logger;
 
 @Controller
 @RequestMapping("/customer")
@@ -35,7 +36,7 @@ public class CustomerController {
     @Autowired
     private CarRentalService carRentalService;
 
-
+    private static final Logger LOGGER = Logger.getLogger(CustomerController.class.getName());
     @GetMapping
     public String index(Model model) {
         model.addAttribute("listCar", carService.findTop5ByOrderByRentedDesc());

@@ -13,13 +13,13 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-
+import java.util.logging.Logger;
 @Controller
 @RequestMapping("/auth")
 public class AuthenticationController {
     @Autowired
     private AccountService accountService;
-
+    private static final Logger LOGGER = Logger.getLogger(AuthenticationController.class.getName());
     @GetMapping("/login")
     public String login() {
         return "login/login";
@@ -56,6 +56,13 @@ public class AuthenticationController {
             }else{
                 Account account = accountService.findByUsername(username);
                 session.setAttribute("account", account);
+                // Log thông tin session
+                LOGGER.info("Đăng nhập thành công: " +
+                        "Username=" + username +
+                        ", Role=" + account.getRole() +
+                        ", Session ID=" + session.getId() +
+                        ", Creation Time=" + new java.util.Date(session.getCreationTime()) +
+                        ", Last Accessed Time=" + new java.util.Date(session.getLastAccessedTime()));
                 if("admin".equals(account.getRole())){
                     return "redirect:/admin";
                 }else{
