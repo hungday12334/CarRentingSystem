@@ -63,10 +63,13 @@ public class AuthenticationController {
                         ", Session ID=" + session.getId() +
                         ", Creation Time=" + new java.util.Date(session.getCreationTime()) +
                         ", Last Accessed Time=" + new java.util.Date(session.getLastAccessedTime()));
-                if("admin".equals(account.getRole())){
+                if("admin".equalsIgnoreCase(account.getRole())){
                     return "redirect:/admin";
-                }else{
+                }else if("customer".equalsIgnoreCase(account.getRole())){
                     return "redirect:/customer";
+                }else{
+                    session.invalidate();
+                    return "redirect:/auth/logout?unauthorized=true";
                 }
 
             }

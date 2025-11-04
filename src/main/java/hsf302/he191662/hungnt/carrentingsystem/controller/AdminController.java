@@ -206,5 +206,28 @@ public class AdminController {
             return "redirect:/admin/customers";
         }
     }
-
+    @PostMapping("customers/deactive")
+    public String deactiveCustomer(HttpServletRequest request, Model model, RedirectAttributes redirectAttributes){
+        String sId= request.getParameter("customerId");
+        Long customerId;
+        try{
+            customerId = Long.parseLong(sId);
+        }catch(Exception e) {
+            redirectAttributes.addFlashAttribute("error","Không tồn tại người dùng.");
+            return "redirect:/admin/customers";
+        }
+        Account account = accountService.findByCustomerId(customerId);
+        if(account==null){
+            redirectAttributes.addFlashAttribute("error","Không tồn tại người dùng.");
+            return "redirect:/admin/customers";
+        }else if(!("customer".equalsIgnoreCase(account.getRole())||"admin".equalsIgnoreCase(account.getRole()))||account.isActive() == false){
+            redirectAttributes.addFlashAttribute("error","Tài khoản này đã bị vô hiệu hóa trước đó.");
+            return "redirect:/admin/customers";
+        }else{
+            account.setActive(false);
+            accountService.save(account);
+            redirectAttributes.addFlashAttribute("success", "Vô hiệu hóa thành công, bây giờ người dùng này không thể hoạt động trong hệ thống nữa");
+            return "redirect:/admin/customers";
+        }
+    }
 }

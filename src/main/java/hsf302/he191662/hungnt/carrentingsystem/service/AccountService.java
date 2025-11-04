@@ -8,4 +8,5 @@ public interface AccountService {
     public boolean existsByEmail(String email);
     public void save(Account account);
     public boolean existsByUsernameAndPassword(String username, String password);
+    public Account findByCustomerId(Long customerId);
 }

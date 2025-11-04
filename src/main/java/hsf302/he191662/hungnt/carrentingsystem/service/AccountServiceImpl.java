@@ -33,4 +33,9 @@ public class AccountServiceImpl implements AccountService{
     public boolean existsByUsernameAndPassword(String username, String password) {
         return accountRepository.existsByUsernameAndPassword(username, password);
     }
+
+    @Override
+    public Account findByCustomerId(Long customerId) {
+        return accountRepository.findByCustomerId(customerId);
+    }
 }

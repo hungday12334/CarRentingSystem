@@ -34,14 +34,19 @@ public class AuthFilter implements Filter {
                 response.sendRedirect( "/auth/logout");
                 return;
             } else {
-                boolean isCustomerArea = uri.startsWith("/customer") && "customer".equals(account.getRole());
-                boolean isAdminArea = uri.startsWith("/admin") && "admin".equals(account.getRole());
+                boolean isCustomerArea = uri.startsWith("/customer") && "customer".equalsIgnoreCase(account.getRole());
+                boolean isAdminArea = uri.startsWith("/admin") && "admin".equalsIgnoreCase(account.getRole());
                 if (isCustomerArea || isAdminArea) {
-                    filterChain.doFilter(servletRequest, servletResponse);
-                    return;
+                    if(account.isActive()){
+                        filterChain.doFilter(servletRequest, servletResponse);
+                        return;
+                    }else{
+                        response.sendRedirect( "/auth/logout");
+                        return;
+                    }
                 } else {
                     session.invalidate();
-                    response.sendRedirect( "/auth/login");
+                    response.sendRedirect( "/auth/logout");
                     return;
                 }
             }
