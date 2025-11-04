@@ -160,7 +160,7 @@ public class AdminController {
                     return "admin/customer-update";
                 }
 
-                if(customerService.findByIdentityCard(identityCard)!=null){
+                if(customerService.findByIdentityCard(identityCard)!=null && !identityCard.equals(customer.getIdentityCard() )){
                     model.addAttribute("error", "CCCD đã tồn tại");
                     return "admin/customer-update";
                 }
@@ -173,7 +173,7 @@ public class AdminController {
                     return "admin/customer-update";
                 }
 
-                if(customerService.findByLicenceNumber(licenceNumber)!=null){
+                if(customerService.findByLicenceNumber(licenceNumber)!=null && !licenceNumber.equals(customer.getLicenceNumber())){
                     model.addAttribute("error", "GPLX đã tồn tại");
                     return "admin/customer-update";
                 }

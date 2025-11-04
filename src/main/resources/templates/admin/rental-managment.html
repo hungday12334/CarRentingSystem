@@ -70,7 +70,8 @@
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
         }
 
-        .filter-section input {
+        .filter-section input,
+        .filter-section select {
             padding: 10px;
             font-size: 14px;
             border: 1px solid #ccc;
@@ -79,7 +80,8 @@
             transition: border-color 0.3s;
         }
 
-        .filter-section input:focus {
+        .filter-section input:focus,
+        .filter-section select:focus {
             outline: none;
             border-color: #3498db;
         }
@@ -161,14 +163,16 @@
             content: '✔';
             font-size: 12px;
         }
+
         .error, .success {
             text-align: center;
             margin-bottom: 10px;
         }
+
         .error {
-            color: #d93025; /* đỏ đậm */
+            color: #d93025;
             border: 2px solid #d93025;
-            background-color: #fff; /* nền trắng */
+            background-color: #fff;
             padding: 10px 14px;
             border-radius: 6px;
             font-weight: 600;
@@ -176,13 +180,31 @@
         }
 
         .success {
-            color: #137333; /* xanh đậm */
+            color: #137333;
             border: 2px solid #137333;
-            background-color: #fff; /* nền trắng */
+            background-color: #fff;
             padding: 10px 14px;
             border-radius: 6px;
             font-weight: 600;
+        }
 
+        /* Màu trạng thái */
+        .status-badge {
+            padding: 6px 10px;
+            border-radius: 20px;
+            font-weight: 600;
+            color: white;
+            text-align: center;
+            display: inline-block;
+            min-width: 100px;
+        }
+
+        .status-pending { background-color: #f1c40f; }      /* vàng */
+        .status-confirmed { background-color: #3498db; }    /* xanh dương */
+        .status-shipping { background-color: #9b59b6; }     /* tím */
+        .status-shipped { background-color: #16a085; }      /* xanh ngọc */
+        .status-completed { background-color: #2ecc71; }    /* xanh lá */
+        .status-cancelled { background-color: #e74c3c; }    /* đỏ */
     </style>
 </head>
 <body>
@@ -202,12 +224,21 @@
     <!-- Phần lọc -->
     <div class="filter-section">
         <input type="text" placeholder="ID thuê xe" name="rentalIdFilter">
-        <input type="text" placeholder="Tên khách hàng"  name="customerNameFilter">
+        <input type="text" placeholder="Tên khách hàng" name="customerNameFilter">
+        <select id="statusFilter" onchange="filterByStatus()">
+            <option value="">Tất cả trạng thái</option>
+            <option value="Pending">Pending</option>
+            <option value="Confirmed">Confirmed</option>
+            <option value="Shipping">Shipping</option>
+            <option value="Shipped">Shipped</option>
+            <option value="Completed">Completed</option>
+            <option value="Cancelled">Cancelled</option>
+        </select>
         <button type="button" onclick="filterRentals()">Lọc</button>
     </div>
 
     <!-- Bảng dữ liệu thuê xe -->
-    <table>
+    <table id="rentalTable">
         <div th:if="${error}" class="error" th:text="${error}"></div>
         <div th:if="${success}" class="success" th:text="${success}"></div>
         <thead>
@@ -240,7 +271,10 @@
             <td th:text="${rental.returnDate}"></td>
             <td th:text="${rental.rentPrice}"></td>
             <td th:text="${rental.periodDay} ?: ''"></td>
-            <td th:text="${rental.status}"></td>
+            <td>
+                <span th:text="${rental.status}"
+                      th:classappend="'status-badge status-' + ${rental.status.toLowerCase()}"></span>
+            </td>
             <td th:text="${rental.createAt} ?: ''"></td>
             <td th:text="${rental.updateAt} ?: ''"></td>
         </tr>
@@ -249,16 +283,24 @@
 </div>
 
 <script>
+    // Lọc bằng cách chuyển URL (lọc chính)
     function filterRentals() {
         const rentalId = document.querySelector('input[name="rentalIdFilter"]').value;
         const customerName = document.querySelector('input[name="customerNameFilter"]').value;
-        window.location.href = `/admin/rentals?rentalId=${rentalId}&customerName=${customerName}`;
+        const status = document.getElementById("statusFilter").value;
+        window.location.href = `/admin/rentals?rentalId=${rentalId}&customerName=${customerName}&status=${status}`;
     }
 
-    function confirmStatusChange(form) {
-        if (confirm("Bạn có chắc muốn chuyển tới trạng thái tiếp theo?")) {
-            form.submit();
-        }
+    // Lọc nhanh tại client (chỉ ẩn/hiện theo trạng thái)
+    function filterByStatus() {
+        const selectedStatus = document.getElementById("statusFilter").value.toLowerCase();
+        const rows = document.querySelectorAll("#rentalTable tbody tr");
+
+        rows.forEach(row => {
+            const statusCell = row.querySelector("td:nth-child(9) span");
+            const status = statusCell ? statusCell.textContent.trim().toLowerCase() : "";
+            row.style.display = (!selectedStatus || status === selectedStatus) ? "" : "none";
+        });
     }
 </script>
 </body>

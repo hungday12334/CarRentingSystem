@@ -1,10 +1,276 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Report</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Roboto', sans-serif;
+        }
+
+        body {
+            display: flex;
+            min-height: 100vh;
+            background-color: #f0f2f5;
+        }
+
+        .sidebar {
+            width: 20%;
+            background-color: #1a2634;
+            color: white;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .sidebar a {
+            color: white;
+            text-decoration: none;
+            font-size: 16px;
+            padding: 12px 15px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .sidebar a:hover {
+            background-color: #3498db;
+            transform: translateX(5px);
+        }
+
+        .sidebar .logo {
+            font-size: 28px;
+            font-weight: 700;
+            text-align: center;
+            margin-bottom: 30px;
+            color: #3498db;
+        }
+
+        .main-content {
+            width: 80%;
+            padding: 30px;
+        }
+
+        /* Phần lọc */
+        .filter-section {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 25px;
+            align-items: center;
+            background-color: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+        }
+
+        .filter-section input, .filter-section select {
+            padding: 10px;
+            font-size: 14px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            flex: 1;
+            transition: border-color 0.3s;
+        }
+
+        .filter-section input:focus, .filter-section select:focus {
+            outline: none;
+            border-color: #3498db;
+        }
+
+        .filter-section button {
+            padding: 10px 20px;
+            font-size: 14px;
+            font-weight: 500;
+            border: 2px solid #3498db;
+            background-color: white;
+            color: #3498db;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .filter-section button:hover {
+            background-color: #3498db;
+            color: white;
+        }
+
+        /* Bảng dữ liệu */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background-color: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        th, td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        th {
+            background-color: #3498db;
+            color: white;
+            font-weight: 500;
+            font-size: 14px;
+        }
+
+        td {
+            font-size: 14px;
+            color: #2c3e50;
+        }
+
+        tr:hover {
+            background-color: #f8fafc;
+        }
+
+        .status-badge {
+            padding: 6px 10px;
+            border-radius: 20px;
+            font-weight: 600;
+            color: white;
+            text-align: center;
+            display: inline-block;
+            min-width: 100px;
+        }
+
+        .status-pending {
+            background-color: #f1c40f;
+        }
+
+        .status-confirmed {
+            background-color: #3498db;
+        }
+
+        .status-shipping {
+            background-color: #9b59b6;
+        }
+
+        .status-shipped {
+            background-color: #16a085;
+        }
+
+        .status-completed {
+            background-color: #2ecc71;
+        }
+
+        .status-cancelled {
+            background-color: #e74c3c;
+        }
+
+        .error, .success {
+            text-align: center;
+            margin-bottom: 10px;
+            padding: 10px 14px;
+            border-radius: 6px;
+            font-weight: 600;
+        }
+
+        .error {
+            color: #d93025;
+            border: 2px solid #d93025;
+            background-color: #fff;
+        }
+
+        .success {
+            color: #137333;
+            border: 2px solid #137333;
+            background-color: #fff;
+        }
+    </style>
 </head>
 <body>
-report
+<div class="sidebar">
+    <a href="/admin/customers" class="logo">CRS</a>
+    <a href="/admin/customers">Quản lý khách hàng</a>
+    <a href="/admin/accounts">Quản lý tài khoản</a>
+    <a href="/admin/cars">Quản lý xe</a>
+    <a href="/admin/rentals">Quản lý thuê xe</a>
+    <a href="/admin/reports">Báo cáo thống kê</a>
+    <a href="/auth/logout">Đăng xuất</a>
+</div>
+
+<div class="main-content">
+
+    <!-- ✅ Form lọc -->
+    <form class="filter-section" th:action="@{/admin/reports/filter}" method="get">
+        <label>Từ ngày:</label>
+        <input type="date" name="fromDate" th:value="${fromDate}">
+        <label>Đến ngày:</label>
+        <input type="date" name="toDate" th:value="${toDate}">
+        <label>Sắp xếp theo:</label>
+        <select name="filterType">
+            <option value="returnDate" th:selected="${filterType == 'returnDate'}">Ngày trả</option>
+            <option value="rentPrice" th:selected="${filterType == 'rentPrice'}">Giá thuê</option>
+            <option value="periodDay" th:selected="${filterType == 'periodDay'}">Số ngày thuê</option>
+        </select>
+        <button type="submit">Lọc</button>
+    </form>
+
+    <div th:if="${error}" class="error" th:text="${error}"></div>
+    <div th:if="${success}" class="success" th:text="${success}"></div>
+
+    <table id="rentalTable">
+        <thead>
+        <tr>
+            <th>ID Thuê xe</th>
+            <th>Khách hàng</th>
+            <th>Xe</th>
+            <th>Ngày nhận</th>
+            <th>Ngày trả</th>
+            <th>Giá thuê</th>
+            <th>Số ngày thuê</th>
+            <th>Trạng thái</th>
+            <th>Ngày tạo</th>
+            <th>Ngày cập nhật</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="rental : ${rentals}">
+            <td th:text="${rental.rentalId}"></td>
+            <td th:text="${rental.customer.customerName}"></td>
+            <td th:text="${rental.car.carName}"></td>
+            <td th:text="${rental.pickupDate}"></td>
+            <td th:text="${rental.returnDate}"></td>
+            <td th:text="${rental.rentPrice}"></td>
+            <td th:text="${rental.periodDay} ?: ''"></td>
+            <td>
+                <span th:text="${rental.status}"
+                      th:classappend="'status-badge status-' + ${rental.status.toLowerCase()}"></span>
+            </td>
+            <td th:text="${rental.createAt} ?: ''"></td>
+            <td th:text="${rental.updateAt} ?: ''"></td>
+        </tr>
+        </tbody>
+    </table>
+    <!-- ✅ Tổng kết -->
+    <div class="summary-section" style="
+    margin-top: 25px;
+    background-color: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+    display: flex;
+    justify-content: space-around;
+    font-size: 15px;
+    font-weight: 500;
+">
+        <div>Tổng số đơn: <span th:text="${totalOrders} ?: 0" style="color:#3498db;"></span></div>
+        <div>Tổng số tiền: <span th:text="${#numbers.formatDecimal(totalAmount, 0, 'COMMA', 0, 'POINT')} ?: 0"
+                                 style="color:#2ecc71;"></span> VNĐ
+        </div>
+        <div>Số tiền lớn nhất: <span th:text="${#numbers.formatDecimal(maxAmount, 0, 'COMMA', 0, 'POINT')} ?: 0"
+                                     style="color:#e67e22;"></span> VNĐ
+        </div>
+    </div>
+</div>
 </body>
 </html>

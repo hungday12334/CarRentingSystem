@@ -335,7 +335,7 @@ public class CustomerController {
             customerService.save(customer);
             return "redirect:/customer/rental-history";
         } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("error", "Có lỗi xảy ra trong qus trình xử lý. Vui long đăng nhập lại.");
+            redirectAttributes.addFlashAttribute("error", "Có lỗi xảy ra trong quá trình xử lý. Vui long đăng nhập lại.");
             session.invalidate();
                 return "redirect:/auth/login";
         }

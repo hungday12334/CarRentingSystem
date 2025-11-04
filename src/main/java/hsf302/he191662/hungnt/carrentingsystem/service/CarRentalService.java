@@ -11,4 +11,6 @@ public interface CarRentalService {
     public CarRental findById(Long id);
     public List<CarRental> filter(String status, Long customerId,String rentalDateFrom, String rentalDateTo, String periodDay, String rentPriceMin, String rentPriceMax);
     public List<CarRental> findAll();
+    public List<CarRental> findByStatus(String status);
+    public List<CarRental> filter(String fromDate, String toDate, String orderBy);
 }

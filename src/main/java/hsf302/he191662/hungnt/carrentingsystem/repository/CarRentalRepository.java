@@ -25,4 +25,6 @@ public interface CarRentalRepository extends JpaRepository<CarRental,Long> {
             
 """)
     public List<CarRental> filter(@Param("status") String status, @Param("customerId") Long customerId, @Param("rentalDateFrom") LocalDate rentalDateFrom, @Param("rentalDateTo") LocalDate rentalDateTo,@Param("periodDay") Integer periodDay, @Param("rentPriceMin") Double rentPriceMin, @Param("rentPriceMax") Double rentPriceMax);
+
+    List<CarRental> findByStatus(String status);
 }
