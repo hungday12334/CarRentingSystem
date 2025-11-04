@@ -172,14 +172,14 @@ public class CustomerController {
                 model.addAttribute("customer", customer);
                 return "customer/profile";
             }else{
-                if(customerService.findByIdentityCard(identityCard)!=null){
+                if(customerService.findByIdentityCard(identityCard)!=null && !identityCard.equals(customer.getIdentityCard())){
                     model.addAttribute("error", "CMND/CCCD đã tồn tại.");
                     model.addAttribute("customer", customer);
                     return "customer/profile";
                 }
             }
         } catch (Exception e) {
-            model.addAttribute("error", "CMND/CCCD đã tồn tại.");
+            model.addAttribute("error", "CMND/CCCD không hợp lệ.");
             model.addAttribute("customer", customer);
             return "customer/profile";
         }
@@ -190,14 +190,14 @@ public class CustomerController {
                 model.addAttribute("customer", customer);
                 return "customer/profile";
             }else{
-                if(customerService.findByLicenceNumber(licenceNumber)!=null){
+                if(customerService.findByLicenceNumber(licenceNumber)!=null && !licenceNumber.equals(customer.getLicenceNumber())){
                     model.addAttribute("error", "GPLX đã tồn tại.");
                     model.addAttribute("customer", customer);
                     return "customer/profile";
                 }
             }
         } catch (Exception e) {
-            model.addAttribute("error", "GPLX đã tồn tại.");
+            model.addAttribute("error", "GPLX không hợp lệ.");
             model.addAttribute("customer", customer);
             return "customer/profile";
         }
